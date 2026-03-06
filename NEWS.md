@@ -1,4 +1,4 @@
-# rgoogleslides 1.0.1
+# rgoogleslides 1.0.1 (2026-03-06)
 
 ## Bug fixes
 
@@ -98,7 +98,7 @@
 
 * Fixed GitHub repository URL throughout package metadata (`eivicent`).
 
-# rgoogleslides 1.0.0
+# rgoogleslides 1.0.0 (2026-03-06)
 
 ## Breaking changes
 
