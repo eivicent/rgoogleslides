@@ -136,9 +136,7 @@
 
 - Authentication has been completely rewritten to use the gargle
   package, aligning with the tidyverse Google ecosystem (googledrive,
-  googlesheets4).
-  [`authorize()`](https://eivicent.github.io/rgoogleslides/reference/authorize.md)
-  is deprecated in favour of
+  googlesheets4). `authorize()` is deprecated in favour of
   [`gs_auth()`](https://eivicent.github.io/rgoogleslides/reference/gs_auth.md)
   (#new).
 

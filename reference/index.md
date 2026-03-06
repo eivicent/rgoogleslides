@@ -16,8 +16,6 @@ Manage Google Slides API credentials.
   : Edit auth configuration
 - [`gs_oauth_client()`](https://eivicent.github.io/rgoogleslides/reference/gs_oauth_client.md)
   : Retrieve the configured OAuth client
-- [`authorize()`](https://eivicent.github.io/rgoogleslides/reference/authorize.md)
-  **\[deprecated\]** : Authorize R package to access Google Slides API
 
 ## Presentations
 
