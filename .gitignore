@@ -1,6 +1,54 @@
+# R
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
-.httr-oauth
-.DS_store
+*.Rproj
+
+# macOS
+.DS_Store
+
+# OAuth credentials (raw) — never commit; only the encrypted copy in inst/secret/ is committed
+client_secret_*.json
+
+# R CMD check artifacts
+*.Rcheck/
+*.tar.gz
+
+# pkgdown
+docs/
+
+# AI coding tools (local only — excluded from package tarball via .Rbuildignore)
+.agents/
+.cursor/
+skills/
+skills-lock.json
+.adal/
+.agent/
+.augment/
+.claude/
+.codebuddy/
+.commandcode/
+.continue/
+.cortex/
+.crush/
+.factory/
+.goose/
+.iflow/
+.junie/
+.kilocode/
+.kiro/
+.kode/
+.mcpjam/
+.mux/
+.neovate/
+.openhands/
+.pi/
+.pochi/
+.qoder/
+.qwen/
+.roo/
+.trae/
+.vibe/
+.windsurf/
+.zencoder/

@@ -12,14 +12,17 @@ add_delete_table_column_request(
 )
 }
 \arguments{
-\item{google_slides_request}{(Optional) A Google Slides Request object which is used to manage requests to the API}
+\item{google_slides_request}{A \code{GoogleSlidesRequest} object, or \code{NULL}.}
 
-\item{table_object_id}{The table to insert rows into.}
+\item{table_object_id}{The table to delete a column from.}
 
 \item{row_index}{The 0-based row index.}
 
 \item{column_index}{The 0-based column index.}
 }
+\value{
+A \code{GoogleSlidesRequest} object with the request appended.
+}
 \description{
-Deletes a column from a table.
+Add a delete table column request
 }

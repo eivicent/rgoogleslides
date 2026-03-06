@@ -2,7 +2,7 @@
 % Please edit documentation in R/build.R
 \name{add_insert_table_rows_request}
 \alias{add_insert_table_rows_request}
-\title{Add an insert table row request}
+\title{Add an insert table rows request}
 \usage{
 add_insert_table_rows_request(
   google_slides_request = NULL,
@@ -14,7 +14,7 @@ add_insert_table_rows_request(
 )
 }
 \arguments{
-\item{google_slides_request}{(Optional) A Google Slides Request object which is used to manage requests to the API}
+\item{google_slides_request}{A \code{GoogleSlidesRequest} object, or \code{NULL}.}
 
 \item{table_object_id}{The table to insert rows into.}
 
@@ -22,11 +22,13 @@ add_insert_table_rows_request(
 
 \item{column_index}{The 0-based column index.}
 
-\item{insert_below}{Whether to insert new rows below the reference cell location. If True, cells will
-be inserted below cell reference. If False, cells will be inserted above cell reference.}
+\item{insert_below}{If \code{TRUE}, insert below the reference cell.}
 
-\item{number}{The number of rows to be inserted. Maximum 20 per request.}
+\item{number}{Number of rows to insert (max 20).}
+}
+\value{
+A \code{GoogleSlidesRequest} object with the request appended.
 }
 \description{
-Add an insert table row request
+Add an insert table rows request
 }

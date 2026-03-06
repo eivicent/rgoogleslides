@@ -14,35 +14,36 @@ add_replace_all_shapes_with_image_request(
 )
 }
 \arguments{
-\item{google_slides_request}{(Optional) A Google Slides Request object which is used to manage requests to the API}
+\item{google_slides_request}{A \code{GoogleSlidesRequest} object, or \code{NULL}.}
 
-\item{image_url}{The image URL. The image is fetched once at insertion time and a copy is stored for display
-inside the presentation. Image must be less than 50mb in size}
+\item{image_url}{Image URL or Google Drive file ID.}
 
-\item{replace_method}{The replace method. Accepts 'CENTER_INSIDE' and 'CENTER_CROP'}
+\item{replace_method}{\code{"CENTER_INSIDE"} or \code{"CENTER_CROP"}.}
 
-\item{page_object_ids}{(Optional) A character vector that contains the list of slide pages that you
-wish to enact the change on. It can contain multiple values.}
+\item{page_object_ids}{Character vector of page IDs to restrict to. If
+\code{NULL}, the replacement applies to all pages.}
 
-\item{text}{The text to search for in the shape or table.}
+\item{text}{Text to match in the shapes to replace.}
 
-\item{match_case}{Indicates whether the search should respect case}
+\item{match_case}{Whether to match case.}
+}
+\value{
+A \code{GoogleSlidesRequest} object with the request appended.
 }
 \description{
 Add a replace all shapes with image request
 }
-\examples{
-\dontrun{
-library(rgoogleslides)
-rgoogleslides::authorize()
-
-# Define the presentation slide id (Can be retrieved from the url of the slides)
-slides_id <- "<slide-id>"
-
-# Define the internal drive image file to be inserted into slides
-file_id <- "<file_id>"
-
-request <- add_replace_all_shapes_with_image_request(image_url = file_id, text = 'aaa')
-commit_to_slides(slides_id, request)
+\details{
+When \code{image_url} is a Google Drive file ID (not an \verb{http://} or \verb{https://}
+URL), the function constructs a Drive download URL that embeds a short-lived
+OAuth access token as a query parameter. See \code{add_create_image_request()}
+for the full security note.
 }
+\examples{
+\dontshow{if (gs_has_token()) withAutoprint(\{ # examplesIf}
+request <- add_replace_all_shapes_with_image_request(
+  image_url = "https://example.com/image.png",
+  text = "placeholder"
+)
+\dontshow{\}) # examplesIf}
 }

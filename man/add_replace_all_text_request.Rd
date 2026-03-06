@@ -6,22 +6,22 @@
 \usage{
 add_replace_all_text_request(
   google_slides_request = NULL,
-  replace_text = NULL,
-  text = NULL,
+  replace_text,
+  text,
   match_case = TRUE
 )
 }
 \arguments{
-\item{google_slides_request}{(Optional) A Google Slides Request object which is used to manage requests to the API}
+\item{google_slides_request}{A \code{GoogleSlidesRequest} object, or \code{NULL}.}
 
-\item{replace_text}{A character vector of text that would replace the ones in the text parameter.
-The order of the replaceText matters}
+\item{replace_text}{Replacement text.}
 
-\item{text}{A character vector of text that would replaced by the ones in the replaceText parameter.
-The order of the text matters}
+\item{text}{Text to search for.}
 
-\item{match_case}{(Optional) A boolean that takes in only TRUE or FALSE only. This would be applied across all
-requests}
+\item{match_case}{Whether to match case.}
+}
+\value{
+A \code{GoogleSlidesRequest} object with the request appended.
 }
 \description{
 Add a replace all text request

@@ -1,19 +1,38 @@
 Package: rgoogleslides
-Type: Package
-Title: R Interface to Google Slides
-Version: 0.3.2
-Author: Hairizuan Bin Noorazman
-Maintainer: Hairizuan Noorazman <hairizuanbinnoorazman@gmail.com>
-Description: Previously, when one is working with in the Google Ecosystem (Using Google Drive etc), there is hardly any good workflow of getting the values calculated from R and getting that into Google Slides. The normal and easy way out would be to just copy your work over but when you have a number of analysis to present with a lot of changes between each environment, it just becomes quite cumbersome.
+Title: R Interface to the 'Google Slides' API
+Version: 1.0.1
+Authors@R: c(
+    person("Hairizuan Bin", "Noorazman", role = "aut",
+           email = "hairizuanbinnoorazman@gmail.com"),
+    person("Vicent", "Boned", role = c("cre", "ctb", "cph"),
+           email = "vicent.boned@gmail.com")
+    )
+Description: Provides an 'R' interface to the 'Google Slides' API
+    <https://developers.google.com/slides/api>. Create presentations,
+    add slides, insert text, tables, images, and videos programmatically
+    from 'R'. Designed for reproducible reporting workflows where analysis
+    results need to be pushed directly into 'Google Slides' presentations.
 License: MIT + file LICENSE
-LazyData: TRUE
+URL: https://github.com/eivicent/rgoogleslides
+BugReports: https://github.com/eivicent/rgoogleslides/issues
+Encoding: UTF-8
+Depends: R (>= 4.1)
 Imports:
-    httr (>= 1.1.0),
+    cli,
+    gargle (>= 1.5.0),
+    httr,
     jsonlite,
-    assertthat,
-    R6
+    lifecycle,
+    R6,
+    rlang
 Suggests:
+    covr,
     knitr,
     rmarkdown,
-    testthat
-RoxygenNote: 7.0.2
+    testthat (>= 3.0.0),
+    withr
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+NeedsCompilation: no

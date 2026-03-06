@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{aligned_page_element_property}
 \alias{aligned_page_element_property}
-\title{Convenience function to return a page element property that aligns said element}
+\title{Convenience function to build a centred or full-page element property}
 \usage{
 aligned_page_element_property(
   slide_page_id,
@@ -14,29 +14,38 @@ aligned_page_element_property(
 )
 }
 \arguments{
-\item{slide_page_id}{The id of the slide page that is to be altered}
+\item{slide_page_id}{The slide page ID.}
 
-\item{slide_page_height}{The slide page height. It is set to default of 9144000}
+\item{slide_page_height}{Slide height in EMU. Default \code{5143500}.}
 
-\item{slide_page_width}{The slide page width. It is set to default of 5143500}
+\item{slide_page_width}{Slide width in EMU. Default \code{9144000}.}
 
-\item{image_height}{Image height in pt. Optional for align mode 'full'}
+\item{image_height}{Image height in pt. Required for \code{align = "center"}.}
 
-\item{image_width}{Image width in pt. Optional for align mode 'full'}
+\item{image_width}{Image width in pt. Required for \code{align = "center"}.}
 
-\item{align}{Alignment mode that is to be selected. 'center' or 'full' is accepted.}
+\item{align}{Alignment mode: \code{"center"} or \code{"full"}.}
+}
+\value{
+A \code{PageElementProperty} object.
 }
 \description{
-The Googleslides do not provide convenient ways to align the element. In order to do
-the necessary calculation, one has to be do take into account the slide size as well as image size.
+The Google Slides API does not provide convenient ways to align elements.
+This function calculates the necessary transforms for centring or
+full-page placement.
 }
 \details{
-The following pointers are thought of when doing the following calculations.
 \itemize{
- \item The image is to be scaled without any distortions. No skews etc
- \item The translation coordinates of an image is defined by the top left corner of the image
- \item The following function will not query the Googleslides API to retrieve the page size automatically.
- The user would need to obtain that information and feed it into this function. This is to prevent
- this function from overutilizing the API unnecessarily when utilizing this function
+\item The image is scaled without distortion.
+\item Translation coordinates are defined by the top-left corner of the image.
+\item This function does not query the API for page size; the user must supply
+it.
 }
+}
+\examples{
+# Centre an image
+prop <- aligned_page_element_property("p", image_height = 200, image_width = 300)
+
+# Full-page placement
+prop <- aligned_page_element_property("p", align = "full")
 }

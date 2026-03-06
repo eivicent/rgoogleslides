@@ -2,19 +2,28 @@
 % Please edit documentation in R/slides.R
 \name{get_slide_page_properties}
 \alias{get_slide_page_properties}
-\title{Get a single page of a Google Slides property}
+\title{Get a single page of a Google Slides presentation}
 \usage{
-get_slide_page_properties(id, page_object_id, response = "simple")
+get_slide_page_properties(id, page_object_id, response = c("simple", "raw"))
 }
 \arguments{
-\item{id}{ID of the presentation slide}
+\item{id}{Presentation ID.}
 
-\item{page_object_id}{The page ID of the presentation slide}
+\item{page_object_id}{The page object ID.}
 
-\item{response}{Type of response. Values can be "simple" or "raw".
-A simple response provides a simplified object to query parts of the slide.
-A raw response provides the actual response via Google API.}
+\item{response}{Type of response: \code{"simple"} returns a parsed object with
+helper methods, \code{"raw"} returns the raw API response list.}
+}
+\value{
+If \code{response} is \code{"simple"}, a \code{SlidePage} R6 object with methods
+\code{get_tables()}, \code{get_text_boxes()}, and \code{get_notes()}. If \code{"raw"}, a
+list containing the raw API response.
 }
 \description{
-Get a single page of a Google Slides property
+Get a single page of a Google Slides presentation
+}
+\examples{
+\dontshow{if (gs_has_token()) withAutoprint(\{ # examplesIf}
+page <- get_slide_page_properties("<presentation-id>", "<page-id>")
+\dontshow{\}) # examplesIf}
 }

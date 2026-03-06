@@ -6,18 +6,19 @@
 \usage{
 add_update_slides_position_request(
   google_slides_request = NULL,
-  slide_object_ids = NULL,
-  insertion_index = NULL
+  slide_object_ids,
+  insertion_index
 )
 }
 \arguments{
-\item{google_slides_request}{(Optional) A Google Slides Request object which is used to manage requests to the API}
+\item{google_slides_request}{A \code{GoogleSlidesRequest} object, or \code{NULL}.}
 
-\item{slide_object_ids}{A character vector of slide ids}
+\item{slide_object_ids}{Character vector of slide IDs to move.}
 
-\item{insertion_index}{Numeric Vector. This is where the slides selected in
-slideobjectids parameter is inserted into. The slides would be inserted based on before the arrangement
-before the move.}
+\item{insertion_index}{Position to move the slides to.}
+}
+\value{
+A \code{GoogleSlidesRequest} object with the request appended.
 }
 \description{
 Add an update slides position request

@@ -2,13 +2,21 @@
 % Please edit documentation in R/slides.R
 \name{get_slides_properties}
 \alias{get_slides_properties}
-\title{Get Google Slides Properties}
+\title{Get Google Slides properties}
 \usage{
 get_slides_properties(id)
 }
 \arguments{
-\item{id}{ID of the presentation slide}
+\item{id}{Presentation ID.}
+}
+\value{
+A list containing the presentation properties.
 }
 \description{
-Get Google Slides Properties
+Retrieve the full properties of a Google Slides presentation.
+}
+\examples{
+\dontshow{if (gs_has_token()) withAutoprint(\{ # examplesIf}
+props <- get_slides_properties("<presentation-id>")
+\dontshow{\}) # examplesIf}
 }

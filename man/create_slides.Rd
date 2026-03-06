@@ -2,15 +2,25 @@
 % Please edit documentation in R/slides.R
 \name{create_slides}
 \alias{create_slides}
-\title{Create a new googleslide}
+\title{Create a new Google Slides presentation}
 \usage{
 create_slides(title = NULL, full_response = FALSE)
 }
 \arguments{
-\item{title}{Title of the presentation slide}
+\item{title}{Title of the presentation.}
 
-\item{full_response}{Parameter to decide whether to return the full response or just the presentation ID}
+\item{full_response}{If \code{TRUE}, return the full API response. If \code{FALSE}
+(default), return just the presentation ID.}
+}
+\value{
+If \code{full_response} is \code{FALSE}, a string with the presentation ID.
+If \code{TRUE}, a list containing the full API response.
 }
 \description{
-Create a new googleslide
+Create a new Google Slides presentation
+}
+\examples{
+\dontshow{if (gs_has_token()) withAutoprint(\{ # examplesIf}
+id <- create_slides("My Presentation")
+\dontshow{\}) # examplesIf}
 }

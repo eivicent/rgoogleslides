@@ -2,13 +2,16 @@
 % Please edit documentation in R/utils.R
 \name{is.page_element_property}
 \alias{is.page_element_property}
-\title{Check if the object is a google slide request object}
+\title{Check if the object is a PageElementProperty}
 \usage{
 is.page_element_property(x)
 }
 \arguments{
-\item{x}{A page_element_property object created from the rgoogleslides package}
+\item{x}{Object to check.}
+}
+\value{
+\code{TRUE} if \code{x} is a \code{PageElementProperty}, \code{FALSE} otherwise.
 }
 \description{
-Check if the object is a google slide request object
+Check if the object is a PageElementProperty
 }

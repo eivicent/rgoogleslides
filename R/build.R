@@ -1,596 +1,717 @@
 #' Add a create slide request
-#' @param google_slides_request (Optional) A Google Slides Request object which is used to manage requests to the API
-#' @param insertion_index (Optional) A numeric vector on where the slide is to be added. If this value
-#' is not provided, the new slide will be added at the end of the slides.
-#' @param layout_id (Optional) A character vector that provides guidance on which layout the new slide is to follow.
-#' Either layout id or predefined layout will be used to create the template for the new slide. If layout id
-#' was not provided, a blank predefined layout will be provided instead.
-#' @param predefined_layout (Optional) A character vector that provides guidance on which layout the new slide
-#' is to follow. Some of the values that would be available is as follows:
-#' \itemize{
-#'  \item BLANK
-#'  \item CAPTION_ONLY
-#'  \item TITLE
-#'  \item TITLE_AND_BODY
-#'  \item TITLE_AND_TWO_COLUMNS
-#'  \item TITLE_ONLY
-#'  \item SECTION_HEADER
-#'  \item SECTION_TITLE_AND_DESCRIPTION
-#'  \item ONE_COLUMN_TEXT
-#'  \item MAIN_POINT
-#'  \item BIG_NUMBER
-#' }
-#' The default value for this parameter is BLANK
-#' @param object_id (Optional) A character vector that is to be used to give names to new slides created via the
-#' slides API
-#' @importFrom assertthat assert_that is.number is.string
-#' @examples
-#' \dontrun{
-#' library(rgoogleslides)
-#' rgoogleslides::authorize()
 #'
-#' # Define the presentation slide id (Can be retrieved from the url of the slides)
-#' slides_id <- "<slide-id>"
+#' @param google_slides_request A `GoogleSlidesRequest` object, or `NULL` to
+#'   create a new one.
+#' @param insertion_index Numeric index where the slide should be inserted.
+#' @param layout_id Layout ID to use for the new slide.
+#' @param predefined_layout Predefined layout name. One of `"BLANK"`,
+#'   `"CAPTION_ONLY"`, `"TITLE"`, `"TITLE_AND_BODY"`,
+#'   `"TITLE_AND_TWO_COLUMNS"`, `"TITLE_ONLY"`, `"SECTION_HEADER"`,
+#'   `"SECTION_TITLE_AND_DESCRIPTION"`, `"ONE_COLUMN_TEXT"`,
+#'   `"MAIN_POINT"`, `"BIG_NUMBER"`. Defaults to `"BLANK"`.
+#' @param object_id Optional ID for the new slide.
 #'
-#' requests <- add_create_slide_page_request()
-#' commit_to_slides(slides_id, requests)
-#'
-#' requests2 <- add_create_slide_page_request(predefined_layout = "TITLE")
-#' commit_to_slides(slides_id, requests2)
-#' }
+#' @return A `GoogleSlidesRequest` object with the request appended.
 #' @export
-add_create_slide_page_request <- function(google_slides_request = NULL, insertion_index=NULL,
-                               layout_id=NULL, predefined_layout=NULL,
-                               object_id=NULL){
-  if(is.null(google_slides_request)){
+#'
+#' @examplesIf gs_has_token()
+#' requests <- add_create_slide_page_request()
+#' commit_to_slides("<slide-id>", requests)
+add_create_slide_page_request <- function(google_slides_request = NULL,
+                                          insertion_index = NULL,
+                                          layout_id = NULL,
+                                          predefined_layout = NULL,
+                                          object_id = NULL) {
+  if (is.null(google_slides_request)) {
     google_slides_request <- google_slide_request_container$new()
   }
-  assert_that(is.number(insertion_index) | is.null(insertion_index))
-  assert_that(is.string(layout_id) | is.null(layout_id))
-  assert_that(is.string(predefined_layout) | is.null(predefined_layout))
-  assert_that(is.string(object_id) | is.null(object_id))
+  check_slide_request(google_slides_request)
+  check_index(insertion_index, allow_null = TRUE)
+  check_string(layout_id, allow_null = TRUE)
+  check_predefined_layout(predefined_layout, allow_null = TRUE)
+  check_string(object_id, allow_null = TRUE)
 
-  create_slide_request <- list(createSlide=list(slideLayoutReference=list()))
+  create_slide_request <- list(createSlide = list(slideLayoutReference = list()))
 
-  # Define object id as slide reference
-  if(!is.null(object_id)){
+  if (!is.null(object_id)) {
     create_slide_request[["createSlide"]][["objectId"]] <- object_id
   }
-
-  # Define insertion index on where the slides to be appended
-  if(!is.null(insertion_index)){
+  if (!is.null(insertion_index)) {
     create_slide_request[["createSlide"]][["insertionIndex"]] <- insertion_index
   }
 
-  # If layout id is available, use layout id, else use predefinedLayout or else if uses default blank layout
-  if(!is.null(layout_id)){
+  if (!is.null(layout_id)) {
     create_slide_request[["createSlide"]][["slideLayoutReference"]][["layoutId"]] <- layout_id
-  } else if(!is.null(predefined_layout)){
+  } else if (!is.null(predefined_layout)) {
     create_slide_request[["createSlide"]][["slideLayoutReference"]][["predefinedLayout"]] <- predefined_layout
   } else {
     create_slide_request[["createSlide"]][["slideLayoutReference"]][["predefinedLayout"]] <- "BLANK"
   }
 
-  if(!is.null(object_id)){
-    create_slide_request[["objectId"]] <- object_id
-  }
-
   google_slides_request$add_request(create_slide_request)
-  return(google_slides_request)
+  google_slides_request
 }
 
 
 #' Add a create shape request
-#' @description This function builds up the request for creating shapes within Googleslides via the API.
-#' @param google_slides_request (Optional) A Google Slides Request object which is used to manage requests to the API
-#' @param shape_type A character vector that contains the shape type for the new shape that is to be created
-#' @param page_element_property A list that contains a page element property. The page element is to be
-#' generated by the page_element_property function in this package. IT IS COMPULSORY TO ADD WIDTH AND HEIGHT AS
-#' PART OF THE page_element_property
-#' @param object_id (Optional) A character vector to name the object created instead of leaving it to Google
-#' @importFrom assertthat assert_that is.string
-#' @examples
-#' \dontrun{
-#' library(rgoogleslides)
-#' rgoogleslides::authorize()
 #'
-#' # Define the presentation slide id (Can be retrieved from the url of the slides)
-#' slides_id <- "<slide-id>"
+#' @param google_slides_request A `GoogleSlidesRequest` object, or `NULL`.
+#' @param shape_type Shape type (e.g. `"RECTANGLE"`, `"STAR_5"`).
+#' @param page_element_property A `PageElementProperty` object with width and
+#'   height.
+#' @param object_id Optional ID for the new shape.
 #'
-#' slide_page <- page_element_property("p", 200, 300)
-#' request <- add_create_shape_request(shape_type = "RECTANGLE", page_element_property = slide_page)
-#' commit_to_slides(slides_id, request)
-#'
-#' slide_page <- aligned_page_element_property("p", image_height = 200, image_width = 300)
-#' request2 <- add_create_shape_request(shape_type = "STAR_5", page_element_property = slide_page)
-#' commit_to_slides(slides_id, request2)
-#' }
+#' @return A `GoogleSlidesRequest` object with the request appended.
 #' @export
-add_create_shape_request <- function(google_slides_request = NULL, shape_type, page_element_property, object_id = NULL){
-  if(is.null(google_slides_request)){
+#'
+#' @examplesIf gs_has_token()
+#' prop <- page_element_property("p", 200, 300)
+#' request <- add_create_shape_request(shape_type = "RECTANGLE",
+#'                                     page_element_property = prop)
+add_create_shape_request <- function(google_slides_request = NULL,
+                                     shape_type,
+                                     page_element_property,
+                                     object_id = NULL) {
+  if (is.null(google_slides_request)) {
     google_slides_request <- google_slide_request_container$new()
   }
-  # Input Validation
-  assert_that(is.google_slide_request(google_slides_request))
-  assert_that(is.page_element_property(page_element_property))
-  assert_that(is.string(shape_type))
-  assert_that(is.string(object_id) | is.null(object_id))
+  check_slide_request(google_slides_request)
+  check_page_element_property(page_element_property)
+  check_shape_type(shape_type)
+  check_string(object_id, allow_null = TRUE)
 
-  create_shape_request <- list(createShape = list(elementProperties = page_element_property$to_list(),
-                                               shapeType = shape_type))
+  create_shape_request <- list(
+    createShape = list(
+      elementProperties = page_element_property$to_list(),
+      shapeType = shape_type
+    )
+  )
 
-  if(!is.null(object_id)){
-    create_shape_request[["objectId"]] <- object_id
+  if (!is.null(object_id)) {
+    create_shape_request[["createShape"]][["objectId"]] <- object_id
   }
 
   google_slides_request$add_request(create_shape_request)
-  return(google_slides_request)
+  google_slides_request
 }
 
 
 #' Add a create table request
-#' @param google_slides_request (Optional) A Google Slides Request object which is used to manage requests to the API
-#' @param page_element_property A list that contains a page element property. The page element is to be
-#' generated by the page_element_property function in this package.
-#' @param rows A numeric vector with the row index of the data to be filled in the table. Only for tables
-#' @param columns A numeric vector with the column index of the data to be filled in the table. Only for tables
-#' @param object_id (Optional) A character vector to name the object created instead of leaving it to Google
+#'
+#' @param google_slides_request A `GoogleSlidesRequest` object, or `NULL`.
+#' @param page_element_property A `PageElementProperty` object.
+#' @param rows Number of rows.
+#' @param columns Number of columns.
+#' @param object_id Optional ID for the new table.
+#'
+#' @return A `GoogleSlidesRequest` object with the request appended.
 #' @export
-add_create_table_request <- function(google_slides_request = NULL, page_element_property,
-                                     rows, columns, object_id = NULL){
-  if(is.null(google_slides_request)){
+#'
+#' @examplesIf gs_has_token()
+#' prop <- page_element_property("<slide-page-id>", 300, 200)
+#' request <- add_create_table_request(
+#'   page_element_property = prop, rows = 3, columns = 4
+#' )
+add_create_table_request <- function(google_slides_request = NULL,
+                                     page_element_property,
+                                     rows, columns,
+                                     object_id = NULL) {
+  if (is.null(google_slides_request)) {
     google_slides_request <- google_slide_request_container$new()
   }
-  # Validating inputs
-  assert_that(is.google_slide_request(google_slides_request))
-  assert_that(is.page_element_property(page_element_property))
-  assert_that(is.numeric(rows))
-  assert_that(is.numeric(columns))
-  assert_that(is.character(object_id) | is.null(object_id))
+  check_slide_request(google_slides_request)
+  check_page_element_property(page_element_property)
+  check_count(rows)
+  check_count(columns)
+  check_string(object_id, allow_null = TRUE)
 
-  create_table_request <- list(createTable = list(elementProperties = page_element_property$to_list(),
-                                                  rows = rows,
-                                                  columns = columns))
+  create_table_request <- list(
+    createTable = list(
+      elementProperties = page_element_property$to_list(),
+      rows = rows,
+      columns = columns
+    )
+  )
 
-  if(!is.null(object_id)){
-    create_table_request[['createTable']][['objectId']] <- object_id
+  if (!is.null(object_id)) {
+    create_table_request[["createTable"]][["objectId"]] <- object_id
   }
 
   google_slides_request$add_request(create_table_request)
-  return(google_slides_request)
+  google_slides_request
 }
 
 
 #' Add an insert text request
-#' @param google_slides_request (Optional) A Google Slides Request object which is used to manage requests to the API
-#' @param object_id The ID of the object where the text is to be inserted into
-#' @param row_index (Optional) A numeric vector of row to insert the text into. This value is only
-#' optional for shapes
-#' @param column_index (Optional) A numeric vector of column to insert the text into. This value is only
-#' optional for shapes
-#' @param text A character vector of text which is to be inserted into the shape or table
-#' @param insertion_index (Optional) A numeric vector which indicate the starting point of how the text
-#' is to be inserted
-#' @importFrom assertthat assert_that is.string is.number
+#'
+#' @param google_slides_request A `GoogleSlidesRequest` object, or `NULL`.
+#' @param object_id ID of the shape or table to insert text into.
+#' @param row_index Row index (for tables only). Must be provided together with
+#'   `column_index`.
+#' @param column_index Column index (for tables only). Must be provided together
+#'   with `row_index`.
+#' @param text Text to insert.
+#' @param insertion_index Starting position for the text.
+#'
+#' @return A `GoogleSlidesRequest` object with the request appended.
 #' @export
-add_insert_text_request <- function(google_slides_request = NULL, object_id,
-                              row_index=NULL, column_index=NULL,
-                              text, insertion_index=NULL){
-  if(is.null(google_slides_request)){
+#'
+#' @examplesIf gs_has_token()
+#' request <- add_insert_text_request(object_id = "<shape-id>", text = "Hello, world!")
+add_insert_text_request <- function(google_slides_request = NULL,
+                                    object_id,
+                                    row_index = NULL,
+                                    column_index = NULL,
+                                    text,
+                                    insertion_index = NULL) {
+  if (is.null(google_slides_request)) {
     google_slides_request <- google_slide_request_container$new()
   }
+  check_slide_request(google_slides_request)
+  check_string(object_id)
+  check_index(row_index, allow_null = TRUE)
+  check_index(column_index, allow_null = TRUE)
+  check_string(text)
+  check_index(insertion_index, allow_null = TRUE)
 
-  assert_that(is.google_slide_request(google_slides_request))
-  assert_that(is.string(object_id))
-  assert_that(is.number(row_index) | is.null(row_index))
-  assert_that(is.number(column_index) | is.null(column_index))
-  assert_that(is.string(text))
-  assert_that(is.number(insertion_index) | is.null(insertion_index))
-
-  insert_text_request <- list(insertText = list(text = text, objectId = object_id))
-  if(!is.null(row_index) & !is.null(column_index)){
-    insert_text_request[["insertText"]][["cellLocation"]] = list()
-    insert_text_request[["insertText"]][["cellLocation"]][["rowIndex"]] <- row_index
-    insert_text_request[["insertText"]][["cellLocation"]][["columnIndex"]] <- column_index
+  if (xor(is.null(row_index), is.null(column_index))) {
+    cli::cli_abort(
+      "{.arg row_index} and {.arg column_index} must both be provided or both be {.code NULL}."
+    )
   }
-  if(!is.null(insertion_index)){
+
+  insert_text_request <- list(
+    insertText = list(text = text, objectId = object_id)
+  )
+
+  if (!is.null(row_index) && !is.null(column_index)) {
+    insert_text_request[["insertText"]][["cellLocation"]] <- list(
+      rowIndex    = row_index,
+      columnIndex = column_index
+    )
+  }
+  if (!is.null(insertion_index)) {
     insert_text_request[["insertText"]][["insertionIndex"]] <- insertion_index
   }
+
   google_slides_request$add_request(insert_text_request)
-  return(google_slides_request)
+  google_slides_request
 }
 
 
-#' Add an insert table row request
-#' @param google_slides_request (Optional) A Google Slides Request object which is used to manage requests to the API
+#' Add an insert table rows request
+#'
+#' @param google_slides_request A `GoogleSlidesRequest` object, or `NULL`.
 #' @param table_object_id The table to insert rows into.
 #' @param row_index The 0-based row index.
 #' @param column_index The 0-based column index.
-#' @param insert_below Whether to insert new rows below the reference cell location. If True, cells will
-#' be inserted below cell reference. If False, cells will be inserted above cell reference.
-#' @param number The number of rows to be inserted. Maximum 20 per request.
-#' @importFrom assertthat assert_that is.number is.string
+#' @param insert_below If `TRUE`, insert below the reference cell.
+#' @param number Number of rows to insert (max 20).
+#'
+#' @return A `GoogleSlidesRequest` object with the request appended.
 #' @export
-add_insert_table_rows_request <- function(google_slides_request = NULL, table_object_id,
-                                    row_index, column_index, insert_below = TRUE,
-                                    number){
-  if(is.null(google_slides_request)){
+#'
+#' @examplesIf gs_has_token()
+#' request <- add_insert_table_rows_request(
+#'   table_object_id = "<table-id>",
+#'   row_index = 0, column_index = 0, number = 1
+#' )
+add_insert_table_rows_request <- function(google_slides_request = NULL,
+                                          table_object_id,
+                                          row_index, column_index,
+                                          insert_below = TRUE,
+                                          number) {
+  if (is.null(google_slides_request)) {
     google_slides_request <- google_slide_request_container$new()
   }
+  check_slide_request(google_slides_request)
+  check_string(table_object_id)
+  check_index(row_index)
+  check_index(column_index)
+  check_bool(insert_below)
+  check_count(number)
+  if (number > 20) {
+    cli::cli_abort("{.arg number} must be at most 20, not {number}.")
+  }
 
-  # Check input parameters
-  assert_that(is.string(table_object_id))
-  assert_that(is.number(row_index))
-  assert_that(is.number(column_index))
-  assert_that(is.logical(insert_below))
-  assert_that(is.number(number))
-  assert_that(number <= 20)
-  insert_table_rows_request <- list(insertTableRows = list(tableObjectId = table_object_id,
-                                    insertBelow = insert_below,
-                                    number = number))
-  insert_table_rows_request[['cellLocation']] <- list()
-  insert_table_rows_request[['cellLocation']][['rowIndex']]  <- row_index
-  insert_table_rows_request[['cellLocation']][['columnIndex']] <- column_index
+  insert_table_rows_request <- list(
+    insertTableRows = list(
+      tableObjectId = table_object_id,
+      insertBelow   = insert_below,
+      number        = number,
+      cellLocation  = list(
+        rowIndex    = row_index,
+        columnIndex = column_index
+      )
+    )
+  )
+
   google_slides_request$add_request(insert_table_rows_request)
-  return(google_slides_request)
+  google_slides_request
 }
 
 
-#' Add an insert table column request
-#' @param google_slides_request (Optional) A Google Slides Request object which is used to manage requests to the API
-#' @param table_object_id The table to insert rows into.
+#' Add an insert table columns request
+#'
+#' @param google_slides_request A `GoogleSlidesRequest` object, or `NULL`.
+#' @param table_object_id The table to insert columns into.
 #' @param row_index The 0-based row index.
 #' @param column_index The 0-based column index.
-#' @param insert_right Whether to insert new columns to the right of the reference cell location. If True, cells will
-#' be inserted to the right of the cell reference. If False, cells will be inserted to the left of the cell reference.
-#' @param number The number of rows to be inserted. Maximum 20 per request.
-#' @importFrom assertthat assert_that is.number is.string
+#' @param insert_right If `TRUE`, insert to the right of the reference cell.
+#' @param number Number of columns to insert (max 20).
+#'
+#' @return A `GoogleSlidesRequest` object with the request appended.
 #' @export
-add_insert_table_columns_request <- function(google_slides_request = NULL, table_object_id,
-                                          row_index, column_index, insert_right = TRUE,
-                                          number){
-  if(is.null(google_slides_request)){
+#'
+#' @examplesIf gs_has_token()
+#' request <- add_insert_table_columns_request(
+#'   table_object_id = "<table-id>",
+#'   row_index = 0, column_index = 0, number = 1
+#' )
+add_insert_table_columns_request <- function(google_slides_request = NULL,
+                                             table_object_id,
+                                             row_index, column_index,
+                                             insert_right = TRUE,
+                                             number) {
+  if (is.null(google_slides_request)) {
     google_slides_request <- google_slide_request_container$new()
   }
+  check_slide_request(google_slides_request)
+  check_string(table_object_id)
+  check_index(row_index)
+  check_index(column_index)
+  check_bool(insert_right)
+  check_count(number)
+  if (number > 20) {
+    cli::cli_abort("{.arg number} must be at most 20, not {number}.")
+  }
 
-  # Check input parameters
-  assert_that(is.google_slide_request(google_slides_request))
-  assert_that(is.string(table_object_id))
-  assert_that(is.number(row_index))
-  assert_that(is.number(column_index))
-  assert_that(is.logical(insert_right))
-  assert_that(is.number(number))
-  assert_that(number <= 20)
+  insert_table_columns_request <- list(
+    insertTableColumns = list(
+      tableObjectId = table_object_id,
+      insertRight   = insert_right,
+      number        = number,
+      cellLocation  = list(
+        rowIndex    = row_index,
+        columnIndex = column_index
+      )
+    )
+  )
 
-  insert_table_columns_request <- list(insertTableColumns = list(tableObjectId = table_object_id,
-                                    insertRight = insert_right,
-                                    number = number))
-  insert_table_columns_request[['cellLocation']] <- list()
-  insert_table_columns_request[['cellLocation']][['rowIndex']]  <- row_index
-  insert_table_columns_request[['cellLocation']][['columnIndex']] <- column_index
   google_slides_request$add_request(insert_table_columns_request)
-  return(google_slides_request)
+  google_slides_request
 }
 
 
 #' Add a delete table row request
-#' @description Deletes a row from a table.
-#' @param google_slides_request (Optional) A Google Slides Request object which is used to manage requests to the API
+#'
+#' @param google_slides_request A `GoogleSlidesRequest` object, or `NULL`.
 #' @param table_object_id The table to delete a row from.
 #' @param row_index The 0-based row index.
 #' @param column_index The 0-based column index.
-#' @importFrom assertthat assert_that is.string is.number
+#'
+#' @return A `GoogleSlidesRequest` object with the request appended.
 #' @export
-add_delete_table_row_request <- function(google_slides_request = NULL, table_object_id,
-                                         row_index, column_index){
-  if(is.null(google_slides_request)){
+#'
+#' @examplesIf gs_has_token()
+#' request <- add_delete_table_row_request(
+#'   "<table-id>", row_index = 0, column_index = 0
+#' )
+add_delete_table_row_request <- function(google_slides_request = NULL,
+                                         table_object_id,
+                                         row_index, column_index) {
+  if (is.null(google_slides_request)) {
     google_slides_request <- google_slide_request_container$new()
   }
+  check_slide_request(google_slides_request)
+  check_string(table_object_id)
+  check_index(row_index)
+  check_index(column_index)
 
-  # Check input parameters
-  assert_that(is.google_slide_request(google_slides_request))
-  assert_that(is.string(table_object_id))
-  assert_that(is.number(row_index))
-  assert_that(is.number(column_index))
+  delete_table_row_request <- list(
+    deleteTableRow = list(
+      tableObjectId = table_object_id,
+      cellLocation  = list(
+        rowIndex    = row_index,
+        columnIndex = column_index
+      )
+    )
+  )
 
-  delete_table_row_request <- list(deleteTableRow = list(tableObjectId = table_object_id))
-  delete_table_row_request[['cellLocation']] <- list()
-  delete_table_row_request[['cellLocation']][['rowIndex']]  <- row_index
-  delete_table_row_request[['cellLocation']][['columnIndex']] <- column_index
   google_slides_request$add_request(delete_table_row_request)
-  return(google_slides_request)
+  google_slides_request
 }
 
 
 #' Add a delete table column request
-#' @description Deletes a column from a table.
-#' @param google_slides_request (Optional) A Google Slides Request object which is used to manage requests to the API
-#' @param table_object_id The table to insert rows into.
+#'
+#' @param google_slides_request A `GoogleSlidesRequest` object, or `NULL`.
+#' @param table_object_id The table to delete a column from.
 #' @param row_index The 0-based row index.
 #' @param column_index The 0-based column index.
-#' @importFrom assertthat assert_that is.string is.number
+#'
+#' @return A `GoogleSlidesRequest` object with the request appended.
 #' @export
-add_delete_table_column_request <- function(google_slides_request = NULL, table_object_id,
-                                             row_index, column_index){
-  if(is.null(google_slides_request)){
+#'
+#' @examplesIf gs_has_token()
+#' request <- add_delete_table_column_request(
+#'   "<table-id>", row_index = 0, column_index = 0
+#' )
+add_delete_table_column_request <- function(google_slides_request = NULL,
+                                            table_object_id,
+                                            row_index, column_index) {
+  if (is.null(google_slides_request)) {
     google_slides_request <- google_slide_request_container$new()
   }
+  check_slide_request(google_slides_request)
+  check_string(table_object_id)
+  check_index(row_index)
+  check_index(column_index)
 
-  # Check input parameters
-  assert_that(is.google_slide_request(google_slides_request))
-  assert_that(is.string(table_object_id))
-  assert_that(is.number(row_index))
-  assert_that(is.number(column_index))
+  delete_table_column_request <- list(
+    deleteTableColumn = list(
+      tableObjectId = table_object_id,
+      cellLocation  = list(
+        rowIndex    = row_index,
+        columnIndex = column_index
+      )
+    )
+  )
 
-  delete_table_column_request <- list(deleteTableColumn = list(tableObjectId = table_object_id))
-  delete_table_column_request[['cellLocation']] <- list()
-  delete_table_column_request[['cellLocation']][['rowIndex']]  <- row_index
-  delete_table_column_request[['cellLocation']][['columnIndex']] <- column_index
   google_slides_request$add_request(delete_table_column_request)
-  return(google_slides_request)
+  google_slides_request
 }
 
 
 #' Add a replace all text request
-#' @param google_slides_request (Optional) A Google Slides Request object which is used to manage requests to the API
-#' @param replace_text A character vector of text that would replace the ones in the text parameter.
-#' The order of the replaceText matters
-#' @param text A character vector of text that would replaced by the ones in the replaceText parameter.
-#' The order of the text matters
-#' @param match_case (Optional) A boolean that takes in only TRUE or FALSE only. This would be applied across all
-#' requests
-#' @importFrom assertthat assert_that is.string
+#'
+#' @param google_slides_request A `GoogleSlidesRequest` object, or `NULL`.
+#' @param replace_text Replacement text.
+#' @param text Text to search for.
+#' @param match_case Whether to match case.
+#'
+#' @return A `GoogleSlidesRequest` object with the request appended.
 #' @export
-add_replace_all_text_request <- function(google_slides_request = NULL, replace_text=NULL, text=NULL, match_case=TRUE){
-  if(is.null(google_slides_request)){
+#'
+#' @examplesIf gs_has_token()
+#' request <- add_replace_all_text_request(replace_text = "new", text = "old")
+add_replace_all_text_request <- function(google_slides_request = NULL,
+                                         replace_text,
+                                         text,
+                                         match_case = TRUE) {
+  if (is.null(google_slides_request)) {
     google_slides_request <- google_slide_request_container$new()
   }
+  check_slide_request(google_slides_request)
+  check_string(replace_text)
+  check_string(text)
+  check_bool(match_case)
 
-  # Input Validation
-  assert_that(is.google_slide_request(google_slides_request))
-  assert_that(is.string(replace_text))
-  assert_that(is.string(text))
-  assert_that(is.logical(match_case))
+  replace_all_text_list <- list(
+    replaceAllText = list(
+      replaceText  = replace_text,
+      containsText = list(text = text, matchCase = match_case)
+    )
+  )
 
-  replace_all_text_list <- list(replaceAllText = list(replaceText = replace_text,
-                                                      containsText = list(text = text, matchCase = match_case)))
   google_slides_request$add_request(replace_all_text_list)
-  return(google_slides_request)
+  google_slides_request
 }
 
 
 #' Add a delete object request
-#' @param google_slides_request (Optional) A Google Slides Request object which is used to manage requests to the API
-#' @param object_id A character vector of object ids that is to be deleted from the slides
-#' @importFrom assertthat assert_that is.string
+#'
+#' @param google_slides_request A `GoogleSlidesRequest` object, or `NULL`.
+#' @param object_id ID of the object to delete.
+#'
+#' @return A `GoogleSlidesRequest` object with the request appended.
 #' @export
-add_delete_object_request <- function(google_slides_request = NULL, object_id=NULL){
-  if(is.null(google_slides_request)){
+#'
+#' @examplesIf gs_has_token()
+#' request <- add_delete_object_request(object_id = "<shape-id>")
+add_delete_object_request <- function(google_slides_request = NULL,
+                                      object_id) {
+  if (is.null(google_slides_request)) {
     google_slides_request <- google_slide_request_container$new()
   }
-
-  # Check validity of inputs
-  assert_that(is.google_slide_request(google_slides_request))
-  assert_that(is.string(object_id))
+  check_slide_request(google_slides_request)
+  check_string(object_id)
 
   delete_object_request <- list(deleteObject = list(objectId = object_id))
+
   google_slides_request$add_request(delete_object_request)
-  return(google_slides_request)
+  google_slides_request
 }
 
 
 #' Add an update slides position request
-#' @param google_slides_request (Optional) A Google Slides Request object which is used to manage requests to the API
-#' @param slide_object_ids A character vector of slide ids
-#' @param insertion_index Numeric Vector. This is where the slides selected in
-#' slideobjectids parameter is inserted into. The slides would be inserted based on before the arrangement
-#' before the move.
+#'
+#' @param google_slides_request A `GoogleSlidesRequest` object, or `NULL`.
+#' @param slide_object_ids Character vector of slide IDs to move.
+#' @param insertion_index Position to move the slides to.
+#'
+#' @return A `GoogleSlidesRequest` object with the request appended.
 #' @export
-add_update_slides_position_request <- function(google_slides_request = NULL, slide_object_ids=NULL,
-                                               insertion_index=NULL){
-  if(is.null(google_slides_request)){
+#'
+#' @examplesIf gs_has_token()
+#' request <- add_update_slides_position_request(
+#'   slide_object_ids = "<slide-id>", insertion_index = 0
+#' )
+add_update_slides_position_request <- function(google_slides_request = NULL,
+                                               slide_object_ids,
+                                               insertion_index) {
+  if (is.null(google_slides_request)) {
     google_slides_request <- google_slide_request_container$new()
   }
-  update_slides_postion_request <- list(updateSlidesPosition = list(slideObjectIds = list(slide_object_ids),
-                                                                    insertionIndex=insertion_index))
-  google_slides_request$add_request(update_slides_postion_request)
-  return(google_slides_request)
+  check_slide_request(google_slides_request)
+  check_character_vector(slide_object_ids)
+  check_index(insertion_index)
+
+  update_slides_position_request <- list(
+    updateSlidesPosition = list(
+      slideObjectIds = as.list(slide_object_ids),
+      insertionIndex = insertion_index
+    )
+  )
+
+  google_slides_request$add_request(update_slides_position_request)
+  google_slides_request
 }
 
 
 #' Add a delete text request
-#' @param google_slides_request (Optional) A Google Slides Request object which is used to manage requests to the API
-#' @param object_id A string to remove text from. You can only remove text contained in
-#' tables and shapes
-#' @param row_index (Optional) A numeric vector of row to remove the text from. Only needed if you are deleting
-#' text from a table
-#' @param column_index (Optional) A numeric vector of column to remove the text from. Only needed if you are
-#' deleting text from a table
-#' @param start_index (Optional) The optional zero-based index of the beginning of the collection.
-#' Required for SPECIFIC_RANGE and FROM_START_INDEX ranges.
-#' @param end_index (Optional) The optional zero-based index of the end of the collection.
-#' Required for SPECIFIC_RANGE delete mode.
-#' @param type The type of range. Can be the following FIXED_RANGE,
-#' FROM_START_INDEX, ALL. The default value is ALL
-#' @importFrom assertthat assert_that is.string is.number
+#'
+#' @param google_slides_request A `GoogleSlidesRequest` object, or `NULL`.
+#' @param object_id ID of the shape or table containing the text.
+#' @param row_index Row index (for tables only). Must be provided together with
+#'   `column_index`.
+#' @param column_index Column index (for tables only). Must be provided together
+#'   with `row_index`.
+#' @param start_index Start index (required for `"FIXED_RANGE"` and
+#'   `"FROM_START_INDEX"`).
+#' @param end_index End index (required for `"FIXED_RANGE"`).
+#' @param type Range type: `"ALL"`, `"FIXED_RANGE"`, or `"FROM_START_INDEX"`.
+#'
+#' @return A `GoogleSlidesRequest` object with the request appended.
 #' @export
-add_delete_text_request <- function(google_slides_request = NULL, object_id,
-                              row_index = NULL, column_index = NULL,
-                              start_index = NULL, end_index = NULL,
-                              type = "ALL"){
-  if(is.null(google_slides_request)){
+#'
+#' @examplesIf gs_has_token()
+#' request <- add_delete_text_request(object_id = "<shape-id>")
+add_delete_text_request <- function(google_slides_request = NULL,
+                                    object_id,
+                                    row_index = NULL,
+                                    column_index = NULL,
+                                    start_index = NULL,
+                                    end_index = NULL,
+                                    type = "ALL") {
+  if (is.null(google_slides_request)) {
     google_slides_request <- google_slide_request_container$new()
   }
+  check_slide_request(google_slides_request)
+  check_string(object_id)
+  check_index(row_index, allow_null = TRUE)
+  check_index(column_index, allow_null = TRUE)
+  check_index(start_index, allow_null = TRUE)
+  check_index(end_index, allow_null = TRUE)
+  check_range_type(type)
 
-  # Check inputs
-  assert_that(is.google_slide_request(google_slides_request))
-  assert_that(is.string(object_id))
-  assert_that(is.number(row_index) | is.null(row_index))
-  assert_that(is.number(column_index) | is.null(column_index))
-  assert_that(is.number(start_index) | is.null(start_index))
-  assert_that(is.number(end_index) | is.null(end_index))
-  assert_that(is.string(type))
-
-  delete_text_request <- list(deleteText = list(objectId = object_id))
-  if(!is.null(row_index) & !is.null(column_index)){
-    delete_text_request[["deleteText"]][["cellLocation"]] <- list()
-    delete_text_request[["deleteText"]][["cellLocation"]][["rowIndex"]] <- row_index
-    delete_text_request[["deleteText"]][["cellLocation"]][["columnIndex"]] <- column_index
+  if (xor(is.null(row_index), is.null(column_index))) {
+    cli::cli_abort(
+      "{.arg row_index} and {.arg column_index} must both be provided or both be {.code NULL}."
+    )
   }
-  delete_text_request[["deleteText"]][["textRange"]][["type"]] <- list()
-  delete_text_request[["deleteText"]][["textRange"]][["type"]] <- type
-  if(!is.null(start_index)){
+
+  if (type %in% c("FIXED_RANGE", "FROM_START_INDEX") && is.null(start_index)) {
+    cli::cli_abort(
+      "{.arg start_index} is required when {.arg type} is {.val {type}}."
+    )
+  }
+  if (type == "FIXED_RANGE" && is.null(end_index)) {
+    cli::cli_abort(
+      "{.arg end_index} is required when {.arg type} is {.val FIXED_RANGE}."
+    )
+  }
+  if (type != "FIXED_RANGE" && !is.null(end_index)) {
+    cli::cli_warn(
+      "{.arg end_index} is ignored when {.arg type} is {.val {type}}."
+    )
+  }
+
+  delete_text_request <- list(
+    deleteText = list(objectId = object_id)
+  )
+
+  if (!is.null(row_index) && !is.null(column_index)) {
+    delete_text_request[["deleteText"]][["cellLocation"]] <- list(
+      rowIndex    = row_index,
+      columnIndex = column_index
+    )
+  }
+
+  delete_text_request[["deleteText"]][["textRange"]] <- list(type = type)
+  if (type == "FIXED_RANGE") {
     delete_text_request[["deleteText"]][["textRange"]][["startIndex"]] <- start_index
-    delete_text_request[["deleteText"]][["textRange"]][["endIndex"]] <- end_index
+    delete_text_request[["deleteText"]][["textRange"]][["endIndex"]]   <- end_index
+  } else if (type == "FROM_START_INDEX") {
+    delete_text_request[["deleteText"]][["textRange"]][["startIndex"]] <- start_index
   }
+
   google_slides_request$add_request(delete_text_request)
-  return(google_slides_request)
+  google_slides_request
 }
 
 
 #' Add a create image request
-#' @param google_slides_request (Optional) A Google Slides Request object which is used to manage requests to the API
-#' @param url A character vector container an image url that is to be used to add image to the slides
-#' @param page_element_property A list that contains a page element property. The page element is to be
-#' generated by the page_element_property function in this package.
-#' @param object_id (Optional) A character vector to name the object created instead of leaving it to Google
-#' @importFrom assertthat assert_that is.string
+#'
+#' @param google_slides_request A `GoogleSlidesRequest` object, or `NULL`.
+#' @param page_element_property A `PageElementProperty` object.
+#' @param url An image URL, or a Google Drive file ID.
+#' @param object_id Optional ID for the new image.
+#'
+#' @details
+#' When `url` is a Google Drive file ID (not an `http://` or `https://` URL),
+#' the function constructs a Drive download URL that embeds a short-lived OAuth
+#' access token as a query parameter. This URL is sent to the Slides API, which
+#' fetches the image server-side. The token is not stored or cached by this
+#' package, but it will appear in network logs and the Slides API request body.
+#' For sensitive environments prefer passing a publicly accessible HTTPS URL.
+#'
+#' @return A `GoogleSlidesRequest` object with the request appended.
 #' @export
-add_create_image_request <- function(google_slides_request = NULL, page_element_property,
-                                     url, object_id=NULL){
-  if(is.null(google_slides_request)){
+#'
+#' @examplesIf gs_has_token()
+#' prop <- page_element_property("<slide-page-id>", 300, 200)
+#' request <- add_create_image_request(
+#'   page_element_property = prop,
+#'   url = "https://example.com/image.png"
+#' )
+add_create_image_request <- function(google_slides_request = NULL,
+                                     page_element_property,
+                                     url, object_id = NULL) {
+  if (is.null(google_slides_request)) {
     google_slides_request <- google_slide_request_container$new()
   }
-  # Validating inputs
-  assert_that(is.google_slide_request(google_slides_request))
-  assert_that(is.page_element_property(page_element_property))
-  assert_that(is.string(url))
-  assert_that(is.string(object_id) | is.null(object_id))
+  check_slide_request(google_slides_request)
+  check_page_element_property(page_element_property)
+  check_string(url)
+  check_string(object_id, allow_null = TRUE)
 
-  # Check if url contains
-  if (!grepl("http", url, fixed = TRUE)){
-    drive_url <- "https://www.googleapis.com/drive/v3/files/<file_id>?alt=media&access_token=<access_token>"
-    access_token <- get_token()$credentials$access_token
-    drive_url <- gsub("<file_id>", url, drive_url, fixed = TRUE)
-    drive_url <- gsub("<access_token>", access_token, drive_url, fixed = TRUE)
-    url <- drive_url
+  create_image_request <- list(
+    createImage = list(
+      elementProperties = page_element_property$to_list(),
+      url = .resolve_image_url(url)
+    )
+  )
+
+  if (!is.null(object_id)) {
+    create_image_request[["createImage"]][["objectId"]] <- object_id
   }
 
-  create_image_request <- list(createImage = list(elementProperties = page_element_property$to_list(),
-                                               url = url))
   google_slides_request$add_request(create_image_request)
-  return(google_slides_request)
+  google_slides_request
 }
 
 
 #' Add a create video request
-#' @param google_slides_request (Optional) A Google Slides Request object which is used to manage requests to the API
-#' @param id The video source's unique identifier for this video. e.g. For YouTube
-#' video https://www.youtube.com/watch?v=7U3axjORYZ0 , the ID is 7U3axjORYZ0.
-#' @param page_element_property A list that contains a page element property. The page element is to be
-#' generated by the page_element_property function in this package.
-#' @param object_id (Optional) A character vector to name the object created instead of leaving it to Google
-#' @examples
-#' \dontrun{
-#' library(rgoogleslides)
-#' rgoogleslides::authorize()
 #'
-#' # Define the presentation slide id (Can be retrieved from the url of the slides)
-#' slides_id <- "<slide-id>"
+#' @param google_slides_request A `GoogleSlidesRequest` object, or `NULL`.
+#' @param id Video ID. For `source = "YOUTUBE"` this is the YouTube video ID
+#'   (e.g. `"7U3axjORYZ0"`). For `source = "DRIVE"` this is the Google Drive
+#'   file ID.
+#' @param page_element_property A `PageElementProperty` object.
+#' @param source Video source: `"YOUTUBE"` (default) or `"DRIVE"`.
+#' @param object_id Optional ID for the new video.
 #'
-#' # Define the youtube video id (Can be retrieved from the url of the youtube video)
-#' youtube_id <- "<youtube-id>"
-#'
-#' page_element <- aligned_page_element_property("p", align = "full")
-#' request <- add_create_video_request(id = youtube_id, page_element_property = page_element)
-#' commit_to_slides(slide_id, request)
-#' }
+#' @return A `GoogleSlidesRequest` object with the request appended.
 #' @export
+#'
+#' @examplesIf gs_has_token()
+#' prop <- aligned_page_element_property("p", align = "full")
+#' request <- add_create_video_request(id = "<youtube-id>",
+#'                                     page_element_property = prop)
 add_create_video_request <- function(google_slides_request = NULL, id,
-                                     page_element_property, object_id=NULL){
-  if(is.null(google_slides_request)){
+                                     page_element_property,
+                                     source = "YOUTUBE",
+                                     object_id = NULL) {
+  if (is.null(google_slides_request)) {
     google_slides_request <- google_slide_request_container$new()
   }
-  # Validating inputs
-  assert_that(is.google_slide_request(google_slides_request))
-  assert_that(is.character(id))
-  assert_that(is.page_element_property(page_element_property))
-  assert_that(is.character(object_id) | is.null(object_id))
+  check_slide_request(google_slides_request)
+  check_string(id)
+  check_page_element_property(page_element_property)
+  check_video_source(source)
+  check_string(object_id, allow_null = TRUE)
 
-  create_video_request <- list(createVideo = list(elementProperties = page_element_property$to_list(),
-                                                  id = id, source = "YOUTUBE"))
+  create_video_request <- list(
+    createVideo = list(
+      elementProperties = page_element_property$to_list(),
+      id     = id,
+      source = source
+    )
+  )
 
-  # Add the object id if its not null
-  if(!is.null(object_id)){
-    create_video_request[['createVideo']][['objectId']] <- object_id
+  if (!is.null(object_id)) {
+    create_video_request[["createVideo"]][["objectId"]] <- object_id
   }
 
   google_slides_request$add_request(create_video_request)
-  return(google_slides_request)
+  google_slides_request
 }
 
 
 #' Add a replace all shapes with image request
-#' @param google_slides_request (Optional) A Google Slides Request object which is used to manage requests to the API
-#' @param image_url The image URL. The image is fetched once at insertion time and a copy is stored for display
-#' inside the presentation. Image must be less than 50mb in size
-#' @param replace_method The replace method. Accepts 'CENTER_INSIDE' and 'CENTER_CROP'
-#' @param page_object_ids (Optional) A character vector that contains the list of slide pages that you
-#' wish to enact the change on. It can contain multiple values.
-#' @param text The text to search for in the shape or table.
-#' @param match_case Indicates whether the search should respect case
-#' @importFrom assertthat assert_that is.string
-#' @examples
-#' \dontrun{
-#' library(rgoogleslides)
-#' rgoogleslides::authorize()
 #'
-#' # Define the presentation slide id (Can be retrieved from the url of the slides)
-#' slides_id <- "<slide-id>"
+#' @param google_slides_request A `GoogleSlidesRequest` object, or `NULL`.
+#' @param image_url Image URL or Google Drive file ID.
+#' @param replace_method `"CENTER_INSIDE"` or `"CENTER_CROP"`.
+#' @param page_object_ids Character vector of page IDs to restrict to. If
+#'   `NULL`, the replacement applies to all pages.
+#' @param text Text to match in the shapes to replace.
+#' @param match_case Whether to match case.
 #'
-#' # Define the internal drive image file to be inserted into slides
-#' file_id <- "<file_id>"
+#' @details
+#' When `image_url` is a Google Drive file ID (not an `http://` or `https://`
+#' URL), the function constructs a Drive download URL that embeds a short-lived
+#' OAuth access token as a query parameter. See `add_create_image_request()`
+#' for the full security note.
 #'
-#' request <- add_replace_all_shapes_with_image_request(image_url = file_id, text = 'aaa')
-#' commit_to_slides(slides_id, request)
-#' }
+#' @return A `GoogleSlidesRequest` object with the request appended.
 #' @export
-add_replace_all_shapes_with_image_request <- function(google_slides_request = NULL, image_url,
-                                                      replace_method = 'CENTER_INSIDE',
-                                                      page_object_ids = NULL, text,
-                                                      match_case = TRUE){
-  if(is.null(google_slides_request)){
+#'
+#' @examplesIf gs_has_token()
+#' request <- add_replace_all_shapes_with_image_request(
+#'   image_url = "https://example.com/image.png",
+#'   text = "placeholder"
+#' )
+add_replace_all_shapes_with_image_request <- function(
+    google_slides_request = NULL,
+    image_url,
+    replace_method = "CENTER_INSIDE",
+    page_object_ids = NULL,
+    text,
+    match_case = TRUE) {
+  if (is.null(google_slides_request)) {
     google_slides_request <- google_slide_request_container$new()
   }
-  assert_that(is.google_slide_request(google_slides_request))
-  assert_that(is.string(image_url))
-  assert_that(is.character(page_object_ids) | is.null(page_object_ids))
-  assert_that(is.string(text))
-  assert_that(is.logical(match_case))
+  check_slide_request(google_slides_request)
+  check_string(image_url)
+  check_replace_method(replace_method)
+  check_character_vector(page_object_ids, allow_null = TRUE)
+  check_string(text)
+  check_bool(match_case)
 
-  # Check if url contains
-  if (!grepl("http", image_url, fixed = TRUE)){
-    drive_url <- "https://www.googleapis.com/drive/v3/files/<file_id>?alt=media&access_token=<access_token>"
-    access_token <- get_token()$credentials$access_token
-    drive_url <- gsub("<file_id>", image_url, drive_url, fixed = TRUE)
-    drive_url <- gsub("<access_token>", access_token, drive_url, fixed = TRUE)
-    image_url <- drive_url
-  }
-
-  replace_all_shapes_with_image_request <- list(replaceAllShapesWithImage = list(
-    imageUrl = image_url,
-    replaceMethod = replace_method,
-    containsText = list(
-      text = text,
-      matchCase = match_case
+  replace_request <- list(
+    replaceAllShapesWithImage = list(
+      imageUrl      = .resolve_image_url(image_url),
+      replaceMethod = replace_method,
+      containsText  = list(text = text, matchCase = match_case)
     )
-  ))
+  )
 
-  if (!is.null(page_object_ids)){
-    replace_all_shapes_with_image_request[['replaceAllShapesWithImage']][['pageObjectIds']] <- as.list(page_object_ids)
+  if (!is.null(page_object_ids)) {
+    replace_request[["replaceAllShapesWithImage"]][["pageObjectIds"]] <- as.list(page_object_ids)
   }
 
-  google_slides_request$add_request(replace_all_shapes_with_image_request)
-  return(google_slides_request)
+  google_slides_request$add_request(replace_request)
+  google_slides_request
 }
-

@@ -20,47 +20,37 @@ page_element_property(
 )
 }
 \arguments{
-\item{page_object_id}{A character vector that contains the page id of the slide}
+\item{page_object_id}{The slide page ID.}
 
-\item{width_magnitude}{(Optional) A numeric vector that contains the width of the component}
+\item{width_magnitude}{Width of the element.}
 
-\item{height_magnitude}{(Optional) A numeric vector that contains the height of the component}
+\item{height_magnitude}{Height of the element.}
 
-\item{scale_x}{(Optional) A numeric vector that tells how the object is to be sized}
+\item{scale_x}{Horizontal scale factor.}
 
-\item{scale_y}{(Optional) A numeric vector that tells how the object is to be sized}
+\item{scale_y}{Vertical scale factor.}
 
-\item{shear_x}{(Optional) A numeric vector that tells how the object is to be sheared}
+\item{shear_x}{Horizontal shear factor.}
 
-\item{shear_y}{(Optional) A numeric vector that tells how the object is to be sheared}
+\item{shear_y}{Vertical shear factor.}
 
-\item{translate_x}{(Optional) A numeric vector that tells how the object is to be located}
+\item{translate_x}{Horizontal translation.}
 
-\item{translate_y}{(Optional) A numeric vector that tells how the object is to be located}
+\item{translate_y}{Vertical translation.}
 
-\item{width_unit}{(Optional) A string vector that tells the measurement unit to use to locate the
-elements on the slide for the width element}
+\item{width_unit}{Unit for width. Default \code{"PT"}.}
 
-\item{height_unit}{(Optional) A string vector that tells the measurement unit to use to locate the
-elements on the slide for the height element}
+\item{height_unit}{Unit for height. Default \code{"PT"}.}
 
-\item{transform_unit}{(Optional) A string vector that tells the measurement unit to use to locate the
-elements on the slide for the transform element}
+\item{transform_unit}{Unit for transforms. Default \code{"PT"}.}
 }
 \value{
-A PageElementProperty Object
+A \code{PageElementProperty} R6 object.
 }
 \description{
-This property is repeated in various of the request. Hence, to reduce the number of
-times this would appear in the code base, a function is created to handle the creation of this
-list.
+Build a page element property for positioning and sizing elements on a
+slide.
 }
 \examples{
-\dontrun{
-library(googleslides)
-
-# There is only one compulsory field which is pageObjectId is the
-# 'slide id' of the slide being referenced to
-pageElementProperty <- page_element_property("12345")
-}
+prop <- page_element_property("slide-id-1", 200, 300)
 }

@@ -1,101 +1,151 @@
 #' Common Property: Page Element Property
-#' @description This property is repeated in various of the request. Hence, to reduce the number of
-#' times this would appear in the code base, a function is created to handle the creation of this
-#' list.
-#' @param page_object_id A character vector that contains the page id of the slide
-#' @param width_magnitude (Optional) A numeric vector that contains the width of the component
-#' @param height_magnitude (Optional) A numeric vector that contains the height of the component
-#' @param scale_x (Optional) A numeric vector that tells how the object is to be sized
-#' @param scale_y (Optional) A numeric vector that tells how the object is to be sized
-#' @param shear_x (Optional) A numeric vector that tells how the object is to be sheared
-#' @param shear_y (Optional) A numeric vector that tells how the object is to be sheared
-#' @param translate_x (Optional) A numeric vector that tells how the object is to be located
-#' @param translate_y (Optional) A numeric vector that tells how the object is to be located
-#' @param width_unit (Optional) A string vector that tells the measurement unit to use to locate the
-#' elements on the slide for the width element
-#' @param height_unit (Optional) A string vector that tells the measurement unit to use to locate the
-#' elements on the slide for the height element
-#' @param transform_unit (Optional) A string vector that tells the measurement unit to use to locate the
-#' elements on the slide for the transform element
-#' @return A PageElementProperty Object
-#' @importFrom assertthat assert_that
-#' @examples
-#' \dontrun{
-#' library(googleslides)
 #'
-#' # There is only one compulsory field which is pageObjectId is the
-#' # 'slide id' of the slide being referenced to
-#' pageElementProperty <- page_element_property("12345")
-#' }
+#' Build a page element property for positioning and sizing elements on a
+#' slide.
+#'
+#' @param page_object_id The slide page ID.
+#' @param width_magnitude Width of the element.
+#' @param height_magnitude Height of the element.
+#' @param scale_x Horizontal scale factor.
+#' @param scale_y Vertical scale factor.
+#' @param shear_x Horizontal shear factor.
+#' @param shear_y Vertical shear factor.
+#' @param translate_x Horizontal translation.
+#' @param translate_y Vertical translation.
+#' @param width_unit Unit for width. Default `"PT"`.
+#' @param height_unit Unit for height. Default `"PT"`.
+#' @param transform_unit Unit for transforms. Default `"PT"`.
+#'
+#' @return A `PageElementProperty` R6 object.
 #' @export
-page_element_property <- function(page_object_id=NULL,
-  width_magnitude=NULL, height_magnitude=NULL,
-  scale_x=NULL, scale_y=NULL, shear_x=NULL, shear_y=NULL,
-  translate_x=NULL, translate_y=NULL, width_unit="PT", height_unit="PT", transform_unit="PT"){
-  # Basic data checks
-  assert_that(!is.null(page_object_id))
-  page_element_property <- page_element_property_container$new(page_object_id)
+#'
+#' @examples
+#' prop <- page_element_property("slide-id-1", 200, 300)
+page_element_property <- function(page_object_id = NULL,
+                                  width_magnitude = NULL,
+                                  height_magnitude = NULL,
+                                  scale_x = NULL, scale_y = NULL,
+                                  shear_x = NULL, shear_y = NULL,
+                                  translate_x = NULL, translate_y = NULL,
+                                  width_unit = "PT", height_unit = "PT",
+                                  transform_unit = "PT") {
+  check_string(page_object_id)
+  check_positive_number(width_magnitude, allow_null = TRUE)
+  check_positive_number(height_magnitude, allow_null = TRUE)
+  check_unit(width_unit)
+  check_unit(height_unit)
+  check_unit(transform_unit)
 
-  page_element_property$page_object_id <- page_object_id
-  page_element_property$width_magnitude <- width_magnitude
-  page_element_property$height_magnitude <- height_magnitude
-  page_element_property$scale_x <- scale_x
-  page_element_property$scale_y <- scale_y
-  page_element_property$shear_x <- shear_x
-  page_element_property$shear_y <- shear_y
-  page_element_property$translate_x <- translate_x
-  page_element_property$translate_y <- translate_y
-  page_element_property$width_unit <- width_unit
-  page_element_property$height_unit <- height_unit
-  page_element_property$transform_unit <- transform_unit
+  pep <- page_element_property_container$new(page_object_id)
+  pep$width_magnitude  <- width_magnitude
+  pep$height_magnitude <- height_magnitude
+  pep$scale_x     <- scale_x
+  pep$scale_y     <- scale_y
+  pep$shear_x     <- shear_x
+  pep$shear_y     <- shear_y
+  pep$translate_x <- translate_x
+  pep$translate_y <- translate_y
+  pep$width_unit     <- width_unit
+  pep$height_unit    <- height_unit
+  pep$transform_unit <- transform_unit
 
-  return(page_element_property)
+  pep
 }
 
+#' @noRd
 #' @importFrom R6 R6Class
-page_element_property_container <- R6Class('PageElementProperty',
-   public = list(
-     page_object_id = NULL,
-     width_magnitude = NULL, height_magnitude = NULL,
-     scale_x = NULL, scale_y = NULL,
-     shear_x = NULL, shear_y = NULL,
-     translate_x = NULL, translate_y = NULL,
-     width_unit = "PT", height_unit = "PT", transform_unit = "PT",
-     initialize = function(page_object_id){
-       self$page_object_id <- page_object_id
-     },
-     to_list = function(){
-        page_element_list <- list(pageObjectId = self$page_object_id)
+page_element_property_container <- R6Class("PageElementProperty",
+  public = list(
+    #' @field page_object_id Page object ID.
+    page_object_id = NULL,
+    #' @field width_magnitude Width magnitude.
+    width_magnitude = NULL,
+    #' @field height_magnitude Height magnitude.
+    height_magnitude = NULL,
+    #' @field scale_x Horizontal scale.
+    scale_x = NULL,
+    #' @field scale_y Vertical scale.
+    scale_y = NULL,
+    #' @field shear_x Horizontal shear.
+    shear_x = NULL,
+    #' @field shear_y Vertical shear.
+    shear_y = NULL,
+    #' @field translate_x Horizontal translation.
+    translate_x = NULL,
+    #' @field translate_y Vertical translation.
+    translate_y = NULL,
+    #' @field width_unit Width unit.
+    width_unit = "PT",
+    #' @field height_unit Height unit.
+    height_unit = "PT",
+    #' @field transform_unit Transform unit.
+    transform_unit = "PT",
 
-        if(is.numeric(self$width_magnitude) | is.numeric(self$height_magnitude)){
-          page_element_list[["size"]] <- list()
-        }
+    #' @description Create a new PageElementProperty.
+    #' @param page_object_id The page object ID.
+    initialize = function(page_object_id) {
+      self$page_object_id <- page_object_id
+    },
 
-        if(is.numeric(self$width_magnitude)){
-          page_element_list[["size"]][['width']] <- list()
-          page_element_list[["size"]][['width']][['magnitude']] <- self$width_magnitude
-          page_element_list[['size']][['width']][['unit']] <- self$width_unit
-        }
+    #' @description Convert to a list for the API.
+    #' @return A named list suitable for JSON serialization.
+    to_list = function() {
+      page_element_list <- list(pageObjectId = self$page_object_id)
 
-        if(is.numeric(self$height_magnitude)){
-          page_element_list[["size"]][['height']] <- list()
-          page_element_list[["size"]][['height']][['magnitude']] <- self$height_magnitude
-          page_element_list[['size']][['height']][['unit']] <- self$height_unit
-        }
+      if (is.numeric(self$width_magnitude) || is.numeric(self$height_magnitude)) {
+        page_element_list[["size"]] <- list()
+      }
 
-        if(is.numeric(self$scale_x) | is.numeric(self$scale_y) |
-           is.numeric(self$shear_x) | is.numeric(self$shear_y) |
-           is.numeric(self$translate_X) | is.numeric(self$translate_y)){
-          page_element_list[['transform']] <- list()
-          page_element_list[['transform']][['unit']] <- self$transform_unit
-          page_element_list[['transform']][['scaleX']] <- self$scale_x
-          page_element_list[['transform']][['scaleY']] <- self$scale_y
-          page_element_list[['transform']][['shearX']] <- self$shear_x
-          page_element_list[['transform']][['shearY']] <- self$shear_y
-          page_element_list[['transform']][['translateX']] <- self$translate_x
-          page_element_list[['transform']][['translateY']] <- self$translate_y
-        }
-        return(page_element_list)
-     })
+      if (is.numeric(self$width_magnitude)) {
+        page_element_list[["size"]][["width"]] <- list(
+          magnitude = self$width_magnitude,
+          unit = self$width_unit
+        )
+      }
+
+      if (is.numeric(self$height_magnitude)) {
+        page_element_list[["size"]][["height"]] <- list(
+          magnitude = self$height_magnitude,
+          unit = self$height_unit
+        )
+      }
+
+      has_transform <- is.numeric(self$scale_x) || is.numeric(self$scale_y) ||
+        is.numeric(self$shear_x) || is.numeric(self$shear_y) ||
+        is.numeric(self$translate_x) || is.numeric(self$translate_y)
+
+      if (has_transform) {
+        page_element_list[["transform"]] <- list(
+          unit       = self$transform_unit,
+          scaleX     = self$scale_x,
+          scaleY     = self$scale_y,
+          shearX     = self$shear_x,
+          shearY     = self$shear_y,
+          translateX = self$translate_x,
+          translateY = self$translate_y
+        )
+      }
+
+      page_element_list
+    },
+
+    #' @description Print a human-readable summary.
+    print = function(...) {
+      cli::cli_text("<PageElementProperty>")
+      cli::cli_text("  Page: {.val {self$page_object_id}}")
+      if (!is.null(self$width_magnitude) || !is.null(self$height_magnitude)) {
+        cli::cli_text(
+          "  Size: {self$width_magnitude %||% '?'} x {self$height_magnitude %||% '?'} {self$width_unit}"
+        )
+      }
+      has_transform <- !is.null(self$scale_x) || !is.null(self$scale_y) ||
+        !is.null(self$translate_x) || !is.null(self$translate_y)
+      if (has_transform) {
+        cli::cli_text(
+          "  Transform [{self$transform_unit}]: scale ({self$scale_x %||% 1}, {self$scale_y %||% 1}), translate ({self$translate_x %||% 0}, {self$translate_y %||% 0})"
+        )
+      }
+      invisible(self)
+    }
+  )
 )
-

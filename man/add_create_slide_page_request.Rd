@@ -13,50 +13,30 @@ add_create_slide_page_request(
 )
 }
 \arguments{
-\item{google_slides_request}{(Optional) A Google Slides Request object which is used to manage requests to the API}
+\item{google_slides_request}{A \code{GoogleSlidesRequest} object, or \code{NULL} to
+create a new one.}
 
-\item{insertion_index}{(Optional) A numeric vector on where the slide is to be added. If this value
-is not provided, the new slide will be added at the end of the slides.}
+\item{insertion_index}{Numeric index where the slide should be inserted.}
 
-\item{layout_id}{(Optional) A character vector that provides guidance on which layout the new slide is to follow.
-Either layout id or predefined layout will be used to create the template for the new slide. If layout id
-was not provided, a blank predefined layout will be provided instead.}
+\item{layout_id}{Layout ID to use for the new slide.}
 
-\item{predefined_layout}{(Optional) A character vector that provides guidance on which layout the new slide
-is to follow. Some of the values that would be available is as follows:
-\itemize{
- \item BLANK
- \item CAPTION_ONLY
- \item TITLE
- \item TITLE_AND_BODY
- \item TITLE_AND_TWO_COLUMNS
- \item TITLE_ONLY
- \item SECTION_HEADER
- \item SECTION_TITLE_AND_DESCRIPTION
- \item ONE_COLUMN_TEXT
- \item MAIN_POINT
- \item BIG_NUMBER
+\item{predefined_layout}{Predefined layout name. One of \code{"BLANK"},
+\code{"CAPTION_ONLY"}, \code{"TITLE"}, \code{"TITLE_AND_BODY"},
+\code{"TITLE_AND_TWO_COLUMNS"}, \code{"TITLE_ONLY"}, \code{"SECTION_HEADER"},
+\code{"SECTION_TITLE_AND_DESCRIPTION"}, \code{"ONE_COLUMN_TEXT"},
+\code{"MAIN_POINT"}, \code{"BIG_NUMBER"}. Defaults to \code{"BLANK"}.}
+
+\item{object_id}{Optional ID for the new slide.}
 }
-The default value for this parameter is BLANK}
-
-\item{object_id}{(Optional) A character vector that is to be used to give names to new slides created via the
-slides API}
+\value{
+A \code{GoogleSlidesRequest} object with the request appended.
 }
 \description{
 Add a create slide request
 }
 \examples{
-\dontrun{
-library(rgoogleslides)
-rgoogleslides::authorize()
-
-# Define the presentation slide id (Can be retrieved from the url of the slides)
-slides_id <- "<slide-id>"
-
+\dontshow{if (gs_has_token()) withAutoprint(\{ # examplesIf}
 requests <- add_create_slide_page_request()
-commit_to_slides(slides_id, requests)
-
-requests2 <- add_create_slide_page_request(predefined_layout = "TITLE")
-commit_to_slides(slides_id, requests2)
-}
+commit_to_slides("<slide-id>", requests)
+\dontshow{\}) # examplesIf}
 }

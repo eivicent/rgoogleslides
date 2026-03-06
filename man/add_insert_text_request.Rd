@@ -14,20 +14,22 @@ add_insert_text_request(
 )
 }
 \arguments{
-\item{google_slides_request}{(Optional) A Google Slides Request object which is used to manage requests to the API}
+\item{google_slides_request}{A \code{GoogleSlidesRequest} object, or \code{NULL}.}
 
-\item{object_id}{The ID of the object where the text is to be inserted into}
+\item{object_id}{ID of the shape or table to insert text into.}
 
-\item{row_index}{(Optional) A numeric vector of row to insert the text into. This value is only
-optional for shapes}
+\item{row_index}{Row index (for tables only). Must be provided together with
+\code{column_index}.}
 
-\item{column_index}{(Optional) A numeric vector of column to insert the text into. This value is only
-optional for shapes}
+\item{column_index}{Column index (for tables only). Must be provided together
+with \code{row_index}.}
 
-\item{text}{A character vector of text which is to be inserted into the shape or table}
+\item{text}{Text to insert.}
 
-\item{insertion_index}{(Optional) A numeric vector which indicate the starting point of how the text
-is to be inserted}
+\item{insertion_index}{Starting position for the text.}
+}
+\value{
+A \code{GoogleSlidesRequest} object with the request appended.
 }
 \description{
 Add an insert text request

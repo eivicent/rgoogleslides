@@ -2,7 +2,7 @@
 % Please edit documentation in R/build.R
 \name{add_insert_table_columns_request}
 \alias{add_insert_table_columns_request}
-\title{Add an insert table column request}
+\title{Add an insert table columns request}
 \usage{
 add_insert_table_columns_request(
   google_slides_request = NULL,
@@ -14,19 +14,21 @@ add_insert_table_columns_request(
 )
 }
 \arguments{
-\item{google_slides_request}{(Optional) A Google Slides Request object which is used to manage requests to the API}
+\item{google_slides_request}{A \code{GoogleSlidesRequest} object, or \code{NULL}.}
 
-\item{table_object_id}{The table to insert rows into.}
+\item{table_object_id}{The table to insert columns into.}
 
 \item{row_index}{The 0-based row index.}
 
 \item{column_index}{The 0-based column index.}
 
-\item{insert_right}{Whether to insert new columns to the right of the reference cell location. If True, cells will
-be inserted to the right of the cell reference. If False, cells will be inserted to the left of the cell reference.}
+\item{insert_right}{If \code{TRUE}, insert to the right of the reference cell.}
 
-\item{number}{The number of rows to be inserted. Maximum 20 per request.}
+\item{number}{Number of columns to insert (max 20).}
+}
+\value{
+A \code{GoogleSlidesRequest} object with the request appended.
 }
 \description{
-Add an insert table column request
+Add an insert table columns request
 }

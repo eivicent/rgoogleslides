@@ -1,0 +1,54 @@
+url: https://github.com/eivicent/rgoogleslides
+
+template:
+  bootstrap: 5
+
+articles:
+  - title: Articles
+    navbar: ~
+    contents:
+      - rgoogleslides
+      - images
+
+reference:
+  - title: Authentication
+    desc: Manage Google Slides API credentials.
+    contents:
+      - gs_auth
+      - gs_deauth
+      - gs_token
+      - gs_has_token
+      - gs_auth_configure
+      - gs_oauth_client
+      - authorize
+
+  - title: Presentations
+    desc: Create and query presentations.
+    contents:
+      - create_slides
+      - get_slides_properties
+      - get_slide_page_properties
+      - commit_to_slides
+
+  - title: Request builders
+    desc: Build individual API requests to commit as a batch.
+    contents:
+      - starts_with("add_")
+
+  - title: Page element properties
+    desc: Position and size elements on slides.
+    contents:
+      - page_element_property
+      - aligned_page_element_property
+
+  - title: Helpers
+    desc: Discover valid API values and inspect objects.
+    contents:
+      - gs_shape_types
+      - is.google_slide_request
+      - is.page_element_property
+
+  - title: Convenience
+    desc: Higher-level helpers.
+    contents:
+      - create_data_table

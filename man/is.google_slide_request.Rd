@@ -2,13 +2,16 @@
 % Please edit documentation in R/utils.R
 \name{is.google_slide_request}
 \alias{is.google_slide_request}
-\title{Check if the object is a google slide request object}
+\title{Check if the object is a GoogleSlidesRequest}
 \usage{
 is.google_slide_request(x)
 }
 \arguments{
-\item{x}{A google_slide_request object created from the rgoogleslides package}
+\item{x}{Object to check.}
+}
+\value{
+\code{TRUE} if \code{x} is a \code{GoogleSlidesRequest}, \code{FALSE} otherwise.
 }
 \description{
-Check if the object is a google slide request object
+Check if the object is a GoogleSlidesRequest
 }

@@ -15,25 +15,25 @@ add_delete_text_request(
 )
 }
 \arguments{
-\item{google_slides_request}{(Optional) A Google Slides Request object which is used to manage requests to the API}
+\item{google_slides_request}{A \code{GoogleSlidesRequest} object, or \code{NULL}.}
 
-\item{object_id}{A string to remove text from. You can only remove text contained in
-tables and shapes}
+\item{object_id}{ID of the shape or table containing the text.}
 
-\item{row_index}{(Optional) A numeric vector of row to remove the text from. Only needed if you are deleting
-text from a table}
+\item{row_index}{Row index (for tables only). Must be provided together with
+\code{column_index}.}
 
-\item{column_index}{(Optional) A numeric vector of column to remove the text from. Only needed if you are
-deleting text from a table}
+\item{column_index}{Column index (for tables only). Must be provided together
+with \code{row_index}.}
 
-\item{start_index}{(Optional) The optional zero-based index of the beginning of the collection.
-Required for SPECIFIC_RANGE and FROM_START_INDEX ranges.}
+\item{start_index}{Start index (required for \code{"FIXED_RANGE"} and
+\code{"FROM_START_INDEX"}).}
 
-\item{end_index}{(Optional) The optional zero-based index of the end of the collection.
-Required for SPECIFIC_RANGE delete mode.}
+\item{end_index}{End index (required for \code{"FIXED_RANGE"}).}
 
-\item{type}{The type of range. Can be the following FIXED_RANGE,
-FROM_START_INDEX, ALL. The default value is ALL}
+\item{type}{Range type: \code{"ALL"}, \code{"FIXED_RANGE"}, or \code{"FROM_START_INDEX"}.}
+}
+\value{
+A \code{GoogleSlidesRequest} object with the request appended.
 }
 \description{
 Add a delete text request

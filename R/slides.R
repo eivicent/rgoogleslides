@@ -1,201 +1,195 @@
-#' Create a new googleslide
-#' @param title Title of the presentation slide
-#' @param full_response Parameter to decide whether to return the full response or just the presentation ID
-#' @importFrom httr config accept_json content
-#' @importFrom jsonlite fromJSON
+#' Create a new Google Slides presentation
+#'
+#' @param title Title of the presentation.
+#' @param full_response If `TRUE`, return the full API response. If `FALSE`
+#'   (default), return just the presentation ID.
+#'
+#' @return If `full_response` is `FALSE`, a string with the presentation ID.
+#'   If `TRUE`, a list containing the full API response.
 #' @export
-create_slides <- function(title = NULL, full_response = FALSE){
-  # Get endpoint url
-  url <- get_endpoint("slides.endpoint.create")
-  # Get auth token
-  token <- get_token()
-  config <- httr::config(token=token)
-  # Wrapping body parameters in a requests list
-  body_params <- list(title=title)
-  # Modify slides
-  result <- httr::POST(url, config = config, accept_json(), body = body_params, encode = "json")
-  if(httr::status_code(result) != 200){
-    message("Cannot create slides")
-    httr::stop_for_status(result)
-  }
-  # Process and return results
-  result_content <- content(result, "text")
-  result_list <- fromJSON(result_content)
-  # If user request for minimal response
-  if(full_response){
-    return(result_list)
+#'
+#' @examplesIf gs_has_token()
+#' id <- create_slides("My Presentation")
+create_slides <- function(title = NULL, full_response = FALSE) {
+  check_string(title, allow_null = TRUE)
+  check_bool(full_response)
+  url <- gs_build_url("create")
+  body <- list(title = title)
+
+  result_list <- gs_request_make("POST", url, body = body)
+
+  if (full_response) {
+    result_list
   } else {
-    return(result_list$presentationId)
+    result_list$presentationId
   }
 }
 
-#' Get Google Slides Properties
-#' @param id ID of the presentation slide
-#' @importFrom httr config accept_json content
-#' @importFrom jsonlite fromJSON
-#' @importFrom assertthat assert_that is.string
+#' Get Google Slides properties
+#'
+#' Retrieve the full properties of a Google Slides presentation.
+#'
+#' @param id Presentation ID.
+#'
+#' @return A list containing the presentation properties.
 #' @export
-get_slides_properties <- function(id){
-  # Check validity of inputs
-  assert_that(is.string(id))
-
-  # Get endpoint url
-  url <- get_endpoint("slides.endpoint.get", id)
-  # Get auth token
-  token <- get_token()
-  config <- httr::config(token=token)
-  # Get slide properties
-  result <- httr::GET(url, config = config, accept_json())
-  if(httr::status_code(result) != 200){
-    message("ID provided does not point towards any slide")
-    httr::stop_for_status(result)
-  }
-  # Process and return results
-  result_content <- content(result, "text")
-  result_list <- fromJSON(result_content)
-  return(result_list)
+#'
+#' @examplesIf gs_has_token()
+#' props <- get_slides_properties("<presentation-id>")
+get_slides_properties <- function(id) {
+  check_string(id)
+  url <- gs_build_url("get", presentation_id = id)
+  gs_request_make("GET", url)
 }
 
-#' Get a single page of a Google Slides property
-#' @param id ID of the presentation slide
-#' @param page_object_id The page ID of the presentation slide
-#' @param response Type of response. Values can be "simple" or "raw".
-#' A simple response provides a simplified object to query parts of the slide.
-#' A raw response provides the actual response via Google API.
-#' @importFrom httr config accept_json content
-#' @importFrom jsonlite fromJSON
-#' @importFrom assertthat assert_that is.string
+#' Get a single page of a Google Slides presentation
+#'
+#' @param id Presentation ID.
+#' @param page_object_id The page object ID.
+#' @param response Type of response: `"simple"` returns a parsed object with
+#'   helper methods, `"raw"` returns the raw API response list.
+#'
+#' @return If `response` is `"simple"`, a `SlidePage` R6 object with methods
+#'   `get_tables()`, `get_text_boxes()`, and `get_notes()`. If `"raw"`, a
+#'   list containing the raw API response.
 #' @export
-get_slide_page_properties <- function(id, page_object_id, response = "simple"){
-  # Check validity of inputs
-  assert_that(is.string(id))
-  assert_that(is.string(page_object_id))
+#'
+#' @examplesIf gs_has_token()
+#' page <- get_slide_page_properties("<presentation-id>", "<page-id>")
+get_slide_page_properties <- function(id, page_object_id,
+                                      response = c("simple", "raw")) {
+  response <- match.arg(response)
+  check_string(id)
+  check_string(page_object_id)
 
-  # Get endpoint url
-  url <- get_endpoint("slides.endpoint.page.get", id, page_object_id)
-  # Get token
-  token <- get_token()
-  config <- httr::config(token=token)
-  # Get slide properties
-  result <- httr::GET(url, config = config, accept_json())
-  result_content <- content(result, "text")
-  result_list <- fromJSON(result_content, simplifyVector = FALSE)
-  if(httr::status_code(result) != 200){
-    stop(result_list$error$message)
-  }
-  # Process and return results
-  if(response == 'raw'){
-    return(result_list)
+  url <- gs_build_url(
+    "page_get",
+    presentation_id = id,
+    page_object_id  = page_object_id
+  )
+
+  result_list <- gs_request_make("GET", url)
+
+  if (response == "raw") {
+    result_list
   } else {
-    slide_page_response <- slide_page_container$new(result_list)
-    return(slide_page_response)
+    slide_page_container$new(result_list)
   }
 }
 
 
+#' @noRd
 #' @importFrom R6 R6Class
-slide_page_container <- R6Class('SlidePage',
+slide_page_container <- R6Class("SlidePage",
   public = list(
+    #' @field raw_response The raw API response list.
     raw_response = NULL,
-    initialize = function(slide_page_list_response){
+
+    #' @description Create a new SlidePage object.
+    #' @param slide_page_list_response Raw list from API.
+    initialize = function(slide_page_list_response) {
       self$raw_response <- slide_page_list_response
     },
-    # Retrieve a list of tables from the raw response
-    get_tables = function(){
-      list_tables <- list()
-      for (item in self$raw_response$pageElements){
-        if (!is.null(item$table)){
 
-          # Retrieve object id
+    #' @description Retrieve tables from the slide page.
+    #' @return A list of tables, each with `object_id` and `table` (a
+    #'   data.frame).
+    get_tables = function() {
+      list_tables <- list()
+      for (item in self$raw_response$pageElements) {
+        if (!is.null(item$table)) {
           object_id <- item$objectId
 
-          # Retrieve table
-          retrieved_table <- data.frame(stringsAsFactors = FALSE)
-          for(table_row in item$table$tableRows){
-            retrieved_table_row <- c()
-            for(table_cell in table_row$tableCells){
-              # Retrieve content from table cells
+          rows <- lapply(item$table$tableRows, function(table_row) {
+            vapply(table_row$tableCells, function(table_cell) {
               text_content <- ""
-              if(!is.null(table_cell$text$textElements)){
-                for (text_element in table_cell$text$textElements){
-                  text_content <- paste0(text_content, text_element$textRun$content)
+              if (!is.null(table_cell$text$textElements)) {
+                for (text_element in table_cell$text$textElements) {
+                  if (!is.null(text_element$textRun)) {
+                    text_content <- paste0(text_content, text_element$textRun$content)
+                  }
                 }
               }
-              retrieved_table_row <- c(retrieved_table_row, text_content)
-            }
-            retrieved_table <- rbind(retrieved_table, retrieved_table_row, make.row.names = FALSE, deparse.level = 0, stringsAsFactors = FALSE)
-          }
+              text_content
+            }, character(1))
+          })
 
-          # Concatenate results
-          names(retrieved_table)  <- NULL
-          retrieved_table <- data.frame(retrieved_table)
-          temporary_list <- list()
-          temporary_list[['object_id']] <- object_id
-          temporary_list[['table']] <- retrieved_table
-          list_tables[[length(list_tables) + 1]] <- temporary_list
+          retrieved_table <- as.data.frame(
+            do.call(rbind, rows),
+            stringsAsFactors = FALSE
+          )
+          names(retrieved_table) <- NULL
+
+          list_tables[[length(list_tables) + 1]] <- list(
+            object_id = object_id,
+            table     = retrieved_table
+          )
         }
       }
-      return(list_tables)
+      list_tables
     },
-    # Retrieve a list of text boxes from the raw response
-    get_text_boxes = function(){
-      list_text_boxes <- data.frame(stringsAsFactors = FALSE)
-      for (item in self$raw_response$pageElements){
-        if (!is.null(item$shape$shapeType)){
-          if (item$shape$shapeType == "TEXT_BOX"){
 
-            # Retrieve text content
-            text_content <- ""
-            if(!is.null(item$shape$text$textElements)){
-              for (text_element in item$shape$text$textElements){
+    #' @description Retrieve text boxes from the slide page.
+    #' @return A data.frame with columns `object_id` and `text_content`.
+    get_text_boxes = function() {
+      results <- list()
+      for (item in self$raw_response$pageElements) {
+        if (!is.null(item$shape$shapeType) &&
+            item$shape$shapeType == "TEXT_BOX") {
+          text_content <- ""
+          if (!is.null(item$shape$text$textElements)) {
+            for (text_element in item$shape$text$textElements) {
+              if (!is.null(text_element$textRun)) {
                 text_content <- paste0(text_content, text_element$textRun$content)
               }
             }
-
-            # Retrieve object id
-            object_id = item$objectId
-
-            # Concatenate results
-            list_text_boxes <- rbind(list_text_boxes, c(object_id, text_content), stringsAsFactors = FALSE)
           }
+          results[[length(results) + 1]] <- data.frame(
+            object_id    = item$objectId,
+            text_content = text_content,
+            stringsAsFactors = FALSE
+          )
         }
       }
-      if (nrow(list_text_boxes) == 0) {
-        list_text_boxes = data.frame(x=character(0), y = character(0))
+      if (length(results) == 0) {
+        data.frame(object_id = character(0), text_content = character(0))
+      } else {
+        do.call(rbind, results)
       }
-      names(list_text_boxes) <- c('object_id', 'text_content')
-      return(list_text_boxes)
     },
-    # Retrieve a list of notes from the raw response
+
+    #' @description Retrieve speaker notes from the slide page.
+    #' @return A data.frame with columns `object_id` and `text_content`.
     get_notes = function() {
-      list_text_boxes <- data.frame(stringsAsFactors = FALSE)
-      for (item in self$raw_response$slideProperties$notesPage$pageElements) {
-        if (!is.null(item$shape$shapeType)) {
-          if (item$shape$shapeType == "TEXT_BOX") {
-            # Retrieve text content
-            text_content <- ""
-            if (!is.null(item$shape$text$textElements)) {
-              for (text_element in item$shape$text$textElements) {
+      notes_page <- self$raw_response$slideProperties$notesPage
+      if (is.null(notes_page)) {
+        return(data.frame(object_id = character(0), text_content = character(0)))
+      }
+
+      results <- list()
+      for (item in notes_page$pageElements) {
+        if (!is.null(item$shape$shapeType) &&
+            item$shape$shapeType == "TEXT_BOX") {
+          text_content <- ""
+          if (!is.null(item$shape$text$textElements)) {
+            for (text_element in item$shape$text$textElements) {
+              if (!is.null(text_element$textRun)) {
                 text_content <- paste0(text_content, text_element$textRun$content)
               }
             }
-
-            # Retrieve object id
-            object_id = item$objectId
-
-            # Concatenate results
-            list_text_boxes <-
-              rbind(list_text_boxes,
-                    c(object_id, text_content),
-                    stringsAsFactors = FALSE)
           }
+          results[[length(results) + 1]] <- data.frame(
+            object_id    = item$objectId,
+            text_content = text_content,
+            stringsAsFactors = FALSE
+          )
         }
       }
-      if (nrow(list_text_boxes) == 0) {
-        list_text_boxes = data.frame(x=character(0), y = character(0))
+      if (length(results) == 0) {
+        data.frame(object_id = character(0), text_content = character(0))
+      } else {
+        do.call(rbind, results)
       }
-      names(list_text_boxes) <- c('object_id', 'text_content')
-      return(list_text_boxes)
     }
   )
 )

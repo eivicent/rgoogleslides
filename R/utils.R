@@ -1,165 +1,443 @@
-#' Generate endpoint for the Google Slides API
-#' @param type_of_endpoint Type of endpoint to convert to url
-#' @param id (Optional) ID of the google slides to manipulate. Optional for slides.endpoint.create
-#' @param page_object_id (Optional) ID of the page slide object to be affected
-#' @importFrom assertthat is.string
-get_endpoint <- function(type_of_endpoint = "slides.endpoint.get", id = NULL, page_object_id=NULL){
-  # Check if type of endpoint is create presentation slide endpoint
-  if(type_of_endpoint == "slides.endpoint.create"){
-    return(getOption(type_of_endpoint))
-  }
+# ---- Shape types -------------------------------------------------------------
 
-  # Check that id parameter is a character, if not throw an error
-  assert_that(is.string(id))
+.valid_shape_types <- c(
+  "TEXT_BOX", "RECTANGLE", "ROUND_RECTANGLE", "ELLIPSE", "ARC",
+  "BENT_ARROW", "BENT_UP_ARROW", "BEVEL", "BLOCK_ARC", "BRACE_PAIR",
+  "BRACKET_PAIR", "CAN", "CHEVRON", "CHORD", "CLOUD", "CORNER", "CUBE",
+  "CURVED_DOWN_ARROW", "CURVED_LEFT_ARROW", "CURVED_RIGHT_ARROW",
+  "CURVED_UP_ARROW", "DECAGON", "DIAGONAL_STRIPE", "DIAMOND", "DODECAGON",
+  "DONUT", "DOUBLE_WAVE", "DOWN_ARROW", "DOWN_ARROW_CALLOUT", "FOLDED_CORNER",
+  "FRAME", "HALF_FRAME", "HEART", "HEPTAGON", "HEXAGON", "HOME_PLATE",
+  "HORIZONTAL_SCROLL", "IRREGULAR_SEAL_1", "IRREGULAR_SEAL_2", "LEFT_ARROW",
+  "LEFT_ARROW_CALLOUT", "LEFT_BRACE", "LEFT_BRACKET", "LEFT_RIGHT_ARROW",
+  "LEFT_RIGHT_ARROW_CALLOUT", "LEFT_RIGHT_UP_ARROW", "LEFT_UP_ARROW",
+  "LIGHTNING_BOLT", "MATH_DIVIDE", "MATH_EQUAL", "MATH_MINUS",
+  "MATH_MULTIPLY", "MATH_NOT_EQUAL", "MATH_PLUS", "MOON", "NO_SMOKING",
+  "NOTCHED_RIGHT_ARROW", "OCTAGON", "PARALLELOGRAM", "PENTAGON", "PIE",
+  "PLAQUE", "PLUS", "QUAD_ARROW", "QUAD_ARROW_CALLOUT", "RIBBON", "RIBBON_2",
+  "RIGHT_ARROW", "RIGHT_ARROW_CALLOUT", "RIGHT_BRACE", "RIGHT_BRACKET",
+  "RIGHT_TRIANGLE", "ROUND_1_RECTANGLE", "ROUND_2_DIAGONAL_RECTANGLE",
+  "ROUND_2_SAME_RECTANGLE", "SMILEY_FACE", "SNIP_1_RECTANGLE",
+  "SNIP_2_DIAGONAL_RECTANGLE", "SNIP_2_SAME_RECTANGLE", "SNIP_ROUND_RECTANGLE",
+  "STAR_4", "STAR_5", "STAR_6", "STAR_7", "STAR_8", "STAR_10", "STAR_12",
+  "STAR_16", "STAR_24", "STAR_32", "STRIPED_RIGHT_ARROW", "SUN", "TRAPEZOID",
+  "TRIANGLE", "UP_ARROW", "UP_ARROW_CALLOUT", "UP_DOWN_ARROW", "UTURN_ARROW",
+  "VERTICAL_SCROLL", "WAVE", "WEDGE_ELLIPSE_CALLOUT",
+  "WEDGE_RECTANGLE_CALLOUT", "WEDGE_ROUND_RECTANGLE_CALLOUT",
+  "FLOW_CHART_ALTERNATE_PROCESS", "FLOW_CHART_COLLATE",
+  "FLOW_CHART_CONNECTOR", "FLOW_CHART_DECISION", "FLOW_CHART_DELAY",
+  "FLOW_CHART_DISPLAY", "FLOW_CHART_DOCUMENT", "FLOW_CHART_EXTRACT",
+  "FLOW_CHART_INPUT_OUTPUT", "FLOW_CHART_INTERNAL_STORAGE",
+  "FLOW_CHART_MAGNETIC_DISK", "FLOW_CHART_MAGNETIC_DRUM",
+  "FLOW_CHART_MAGNETIC_TAPE", "FLOW_CHART_MANUAL_INPUT",
+  "FLOW_CHART_MANUAL_OPERATION", "FLOW_CHART_MERGE",
+  "FLOW_CHART_MULTIDOCUMENT", "FLOW_CHART_OFFLINE_STORAGE",
+  "FLOW_CHART_OFFPAGE_CONNECTOR", "FLOW_CHART_ONLINE_STORAGE",
+  "FLOW_CHART_OR", "FLOW_CHART_PREDEFINED_PROCESS",
+  "FLOW_CHART_PREPARATION", "FLOW_CHART_PROCESS", "FLOW_CHART_PUNCHED_CARD",
+  "FLOW_CHART_PUNCHED_TAPE", "FLOW_CHART_SORT",
+  "FLOW_CHART_SUMMING_JUNCTION", "FLOW_CHART_TERMINATOR",
+  "ARROW_EAST", "ARROW_NORTH_EAST", "ARROW_NORTH",
+  "SPEECH", "STARBURST", "TEARDROP",
+  "ELLIPSE_RIBBON", "ELLIPSE_RIBBON_2", "CLOUD_CALLOUT", "CUSTOM"
+)
 
-  # Check if type of endpoint is slides.endpoint.page.get
-  if(type_of_endpoint == "slides.endpoint.page.get"){
-    # Check that pageObjectId parameter is a character, if not throw an error
-    assert_that(is.string(page_object_id))
-    url_temp <- gsub("{presentationId}", id, getOption(type_of_endpoint), fixed=TRUE)
-    url_temp <- gsub("{pageObjectId}", page_object_id, url_temp, fixed=TRUE)
-    return(url_temp)
-  }
-  return(gsub("{presentationId}", id, getOption(type_of_endpoint), fixed=TRUE))
-}
-
-#' Convert dataframe to dataframe with rows and columns
-#' @param data Dataframe of the dataset that is to be converted so that it can be used with the google slides API
-#' @param headers Boolean to indicate whether to convert taking in mind of the headers or not
-dataframe_convert <- function(data=NULL, headers=TRUE){
-  temp_dataframe <- data.frame()
-  i <- 1
-  j <- 1
-  rowCorrection <- 1
-  if(headers){
-    header_names <- names(data)
-    while(j <= ncol(data)){
-      single_header <- data.frame(value = header_names[j], row = i - 1, column = j - 1)
-      temp_dataframe <- rbind(temp_dataframe, single_header)
-      j <- j + 1
-    }
-    j <- 1
-    rowCorrection <- 0
-  }
-  while(i <= nrow(data)){
-    while(j <= ncol(data)){
-      single_row <- data.frame(value = as.character(data[i, j]), row = i - rowCorrection, column = j - 1)
-      temp_dataframe <- rbind(temp_dataframe, single_row)
-      j <- j + 1
-    }
-    i <- i + 1
-    j <- 1
-  }
-  # Type conversion
-  temp_dataframe$value <- as.character(temp_dataframe$value)
-  temp_dataframe$row <- as.numeric(temp_dataframe$row)
-  temp_dataframe$column <- as.numeric(temp_dataframe$column)
-
-  return(temp_dataframe)
-}
-
-#' Get the list of google drive url
-#' @param imageId ID of the image on Google Drive
-get_google_drive_urls <- function(imageId){
-  access_token <- get_token()$credentials$access_token
-  drive_api_url <- "https://www.googleapis.com/drive/v3/files/"
-  get_params <- paste0("?access_token=", access_token, "&alt=media")
-  url <- c()
-  iterator <- 1
-  while(iterator <= length(imageId)){
-    url_single <- paste0(drive_api_url, imageId, get_params)
-    url <- c(url, url_single)
-    iterator <- iterator + 1
-  }
-  return(url)
-}
-
-#' Check if the object is a google slide request object
-#' @param x A google_slide_request object created from the rgoogleslides package
+#' List valid Google Slides shape types
+#'
+#' Returns a character vector of all shape type strings accepted by the Google
+#' Slides API's `createShape` request. Pass any of these values as the
+#' `shape_type` argument of [add_create_shape_request()].
+#'
+#' @return A character vector of valid shape type strings.
 #' @export
-is.google_slide_request <- function(x){
-  "GoogleSlidesRequest" %in% class(x)
+#'
+#' @examples
+#' gs_shape_types()
+gs_shape_types <- function() {
+  .valid_shape_types
 }
 
-#' Check if the object is a google slide request object
-#' @param x A page_element_property object created from the rgoogleslides package
-#' @export
-is.page_element_property <- function(x){
-  "PageElementProperty" %in% class(x)
-}
+# ---- Input validation helpers ------------------------------------------------
 
-#' Convenience function to return a value if the value is NA
-#' @param value Value to check if the value is valid. If value is NA, return as NULL instead.
-#' @description A function that checks and ensure that the value only returns null or a number.
-#' This function can only check one value at a time.
-check_validity <- function(value){
-  if(!is.null(value)){
-    if(is.na(value)){
-      return(NULL)
-    } else {
-      return(value)
-    }
+#' @noRd
+check_string <- function(x,
+                         allow_null = FALSE,
+                         arg = rlang::caller_arg(x),
+                         call = rlang::caller_env()) {
+  if (allow_null && is.null(x)) return(invisible(NULL))
+  if (!rlang::is_string(x)) {
+    cli::cli_abort(
+      "{.arg {arg}} must be a single string, not {.obj_type_of {x}}.",
+      call = call
+    )
   }
-  return(value)
+  invisible(x)
 }
 
-#' Convenience function to return a page element property that aligns said element
-#' @description The Googleslides do not provide convenient ways to align the element. In order to do
-#' the necessary calculation, one has to be do take into account the slide size as well as image size.
-#' @details The following pointers are thought of when doing the following calculations.
-#' \itemize{
-#'  \item The image is to be scaled without any distortions. No skews etc
-#'  \item The translation coordinates of an image is defined by the top left corner of the image
-#'  \item The following function will not query the Googleslides API to retrieve the page size automatically.
-#'  The user would need to obtain that information and feed it into this function. This is to prevent
-#'  this function from overutilizing the API unnecessarily when utilizing this function
-#' }
-#' @param slide_page_id The id of the slide page that is to be altered
-#' @param slide_page_height The slide page height. It is set to default of 9144000
-#' @param slide_page_width The slide page width. It is set to default of 5143500
-#' @param image_height Image height in pt. Optional for align mode 'full'
-#' @param image_width Image width in pt. Optional for align mode 'full'
-#' @param align Alignment mode that is to be selected. 'center' or 'full' is accepted.
-#' @importFrom assertthat assert_that
+#' @noRd
+check_positive_number <- function(x,
+                                   allow_null = FALSE,
+                                   arg = rlang::caller_arg(x),
+                                   call = rlang::caller_env()) {
+  if (allow_null && is.null(x)) return(invisible(NULL))
+  if (!is.numeric(x) || length(x) != 1L || !is.finite(x) || x <= 0) {
+    cli::cli_abort(
+      "{.arg {arg}} must be a single positive number, not {.obj_type_of {x}}.",
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+#' @noRd
+check_count <- function(x,
+                         allow_null = FALSE,
+                         arg = rlang::caller_arg(x),
+                         call = rlang::caller_env()) {
+  if (allow_null && is.null(x)) return(invisible(NULL))
+  if (!is.numeric(x) || length(x) != 1L || !is.finite(x) ||
+      x != floor(x) || x < 1) {
+    cli::cli_abort(
+      "{.arg {arg}} must be a positive whole number, not {.obj_type_of {x}}.",
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+#' @noRd
+check_index <- function(x,
+                         allow_null = FALSE,
+                         arg = rlang::caller_arg(x),
+                         call = rlang::caller_env()) {
+  if (allow_null && is.null(x)) return(invisible(NULL))
+  if (!is.numeric(x) || length(x) != 1L || !is.finite(x) ||
+      x != floor(x) || x < 0) {
+    cli::cli_abort(
+      "{.arg {arg}} must be a non-negative whole number, not {.obj_type_of {x}}.",
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+#' @noRd
+check_bool <- function(x,
+                       arg = rlang::caller_arg(x),
+                       call = rlang::caller_env()) {
+  if (!rlang::is_bool(x)) {
+    cli::cli_abort(
+      "{.arg {arg}} must be `TRUE` or `FALSE`, not {.obj_type_of {x}}.",
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+#' @noRd
+check_character_vector <- function(x,
+                                   allow_null = FALSE,
+                                   arg = rlang::caller_arg(x),
+                                   call = rlang::caller_env()) {
+  if (allow_null && is.null(x)) return(invisible(NULL))
+  if (!is.character(x) || length(x) == 0L || anyNA(x)) {
+    cli::cli_abort(
+      c(
+        "{.arg {arg}} must be a non-empty character vector with no missing values.",
+        "i" = "Got {.obj_type_of {x}} of length {length(x)}."
+      ),
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+#' @noRd
+check_predefined_layout <- function(x,
+                                     allow_null = FALSE,
+                                     arg = rlang::caller_arg(x),
+                                     call = rlang::caller_env()) {
+  if (allow_null && is.null(x)) return(invisible(NULL))
+  valid <- c(
+    "BLANK", "CAPTION_ONLY", "TITLE", "TITLE_AND_BODY",
+    "TITLE_AND_TWO_COLUMNS", "TITLE_ONLY", "SECTION_HEADER",
+    "SECTION_TITLE_AND_DESCRIPTION", "ONE_COLUMN_TEXT",
+    "MAIN_POINT", "BIG_NUMBER"
+  )
+  check_string(x, arg = arg, call = call)
+  if (!x %in% valid) {
+    cli::cli_abort(
+      c(
+        "{.arg {arg}} must be a valid predefined layout.",
+        "x" = "{.val {x}} is not recognised.",
+        "i" = "Valid values: {.val {valid}}."
+      ),
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+#' @noRd
+check_range_type <- function(x,
+                              arg = rlang::caller_arg(x),
+                              call = rlang::caller_env()) {
+  valid <- c("ALL", "FIXED_RANGE", "FROM_START_INDEX")
+  check_string(x, arg = arg, call = call)
+  if (!x %in% valid) {
+    cli::cli_abort(
+      c(
+        "{.arg {arg}} must be a valid range type.",
+        "x" = "{.val {x}} is not recognised.",
+        "i" = "Valid values: {.val {valid}}."
+      ),
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+#' @noRd
+check_replace_method <- function(x,
+                                  arg = rlang::caller_arg(x),
+                                  call = rlang::caller_env()) {
+  valid <- c("CENTER_INSIDE", "CENTER_CROP")
+  check_string(x, arg = arg, call = call)
+  if (!x %in% valid) {
+    cli::cli_abort(
+      c(
+        "{.arg {arg}} must be a valid replace method.",
+        "x" = "{.val {x}} is not recognised.",
+        "i" = "Valid values: {.val {valid}}."
+      ),
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+#' @noRd
+check_unit <- function(x,
+                        arg = rlang::caller_arg(x),
+                        call = rlang::caller_env()) {
+  valid <- c("PT", "EMU")
+  check_string(x, arg = arg, call = call)
+  if (!x %in% valid) {
+    cli::cli_abort(
+      c(
+        "{.arg {arg}} must be a valid unit.",
+        "x" = "{.val {x}} is not recognised.",
+        "i" = "Valid values: {.val {valid}} ({.val PT} = points, {.val EMU} = English Metric Units)."
+      ),
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+#' @noRd
+check_shape_type <- function(x,
+                              arg = rlang::caller_arg(x),
+                              call = rlang::caller_env()) {
+  check_string(x, arg = arg, call = call)
+  if (!x %in% .valid_shape_types) {
+    cli::cli_abort(
+      c(
+        "{.arg {arg}} must be a valid shape type.",
+        "x" = "{.val {x}} is not recognised.",
+        "i" = "See {.fn gs_shape_types} for all valid values."
+      ),
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+#' @noRd
+check_video_source <- function(x,
+                                arg = rlang::caller_arg(x),
+                                call = rlang::caller_env()) {
+  valid <- c("YOUTUBE", "DRIVE")
+  check_string(x, arg = arg, call = call)
+  if (!x %in% valid) {
+    cli::cli_abort(
+      c(
+        "{.arg {arg}} must be a valid video source.",
+        "x" = "{.val {x}} is not recognised.",
+        "i" = "Valid values: {.val {valid}}."
+      ),
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+#' Check if the object is a GoogleSlidesRequest
+#' @param x Object to check.
+#' @return `TRUE` if `x` is a `GoogleSlidesRequest`, `FALSE` otherwise.
 #' @export
-aligned_page_element_property <- function(slide_page_id, slide_page_height = 5143500,
+#'
+#' @examples
+#' req <- add_create_slide_page_request()
+#' is.google_slide_request(req)
+is.google_slide_request <- function(x) {
+  inherits(x, "GoogleSlidesRequest")
+}
+
+#' Check if the object is a PageElementProperty
+#' @param x Object to check.
+#' @return `TRUE` if `x` is a `PageElementProperty`, `FALSE` otherwise.
+#' @export
+#'
+#' @examples
+#' prop <- page_element_property("slide-id-1", 200, 300)
+#' is.page_element_property(prop)
+is.page_element_property <- function(x) {
+  inherits(x, "PageElementProperty")
+}
+
+#' @noRd
+check_slide_request <- function(x,
+                                arg = rlang::caller_arg(x),
+                                call = rlang::caller_env()) {
+  if (!is.google_slide_request(x)) {
+    cli::cli_abort(
+      "{.arg {arg}} must be a {.cls GoogleSlidesRequest} object.",
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+#' @noRd
+check_page_element_property <- function(x,
+                                        arg = rlang::caller_arg(x),
+                                        call = rlang::caller_env()) {
+  if (!is.page_element_property(x)) {
+    cli::cli_abort(
+      "{.arg {arg}} must be a {.cls PageElementProperty} object.",
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+# ---- URL helpers -------------------------------------------------------------
+
+# Resolves a plain Google Drive file ID to a download URL that the Slides API
+# can fetch server-side. If the value is already an http(s) URL it is returned
+# unchanged. The access token is embedded as a query parameter; see the
+# security note in add_create_image_request() for caveats.
+.resolve_image_url <- function(url) {
+  if (startsWith(url, "http://") || startsWith(url, "https://")) {
+    url
+  } else {
+    paste0(
+      "https://www.googleapis.com/drive/v3/files/", url,
+      "?alt=media&access_token=", gs_access_token()
+    )
+  }
+}
+
+# ---- Data conversion helpers -------------------------------------------------
+
+#' Convert dataframe for table insertion
+#'
+#' Converts a data frame into a long-format data frame with `value`, `row`,
+#' and `column` columns suitable for inserting text into a Google Slides table.
+#'
+#' @param data Data frame to convert.
+#' @param headers If `TRUE`, include column names as the first row (row 0).
+#'
+#' @return A data frame with columns `value` (character), `row` (numeric),
+#'   and `column` (numeric).
+#' @noRd
+dataframe_convert <- function(data, headers = TRUE) {
+  nr <- nrow(data)
+  nc <- ncol(data)
+
+  char_mat <- matrix(as.character(as.matrix(data)), nrow = nr, ncol = nc)
+  data_values <- as.character(t(char_mat))
+
+  if (headers) {
+    all_row_ids <- c(0L, seq_len(nr))
+    all_values  <- c(names(data), data_values)
+  } else {
+    all_row_ids <- seq_len(nr) - 1L
+    all_values  <- data_values
+  }
+
+  data.frame(
+    value  = all_values,
+    row    = as.numeric(rep(all_row_ids, each = nc)),
+    column = as.numeric(rep(seq_len(nc) - 1L, times = length(all_row_ids))),
+    stringsAsFactors = FALSE
+  )
+}
+
+#' Convenience function to build a centred or full-page element property
+#'
+#' The Google Slides API does not provide convenient ways to align elements.
+#' This function calculates the necessary transforms for centring or
+#' full-page placement.
+#'
+#' @details
+#' - The image is scaled without distortion.
+#' - Translation coordinates are defined by the top-left corner of the image.
+#' - This function does not query the API for page size; the user must supply
+#'   it.
+#'
+#' @param slide_page_id The slide page ID.
+#' @param slide_page_height Slide height in EMU. Default `5143500`.
+#' @param slide_page_width Slide width in EMU. Default `9144000`.
+#' @param image_height Image height in pt. Required for `align = "center"`.
+#' @param image_width Image width in pt. Required for `align = "center"`.
+#' @param align Alignment mode: `"center"` or `"full"`.
+#'
+#' @return A `PageElementProperty` object.
+#' @export
+#'
+#' @examples
+#' # Centre an image
+#' prop <- aligned_page_element_property("p", image_height = 200, image_width = 300)
+#'
+#' # Full-page placement
+#' prop <- aligned_page_element_property("p", align = "full")
+aligned_page_element_property <- function(slide_page_id,
+                                          slide_page_height = 5143500,
                                           slide_page_width = 9144000,
-                                          image_height = NULL, image_width = NULL, align = "center"){
-  # Validate input
-  assert_that(is.character(slide_page_id))
-  assert_that(is.numeric(slide_page_height))
-  assert_that(is.numeric(slide_page_width))
-  assert_that(align %in% c('center', 'full'))
+                                          image_height = NULL,
+                                          image_width = NULL,
+                                          align = "center") {
+  check_string(slide_page_id)
+  check_positive_number(slide_page_height)
+  check_positive_number(slide_page_width)
 
-  if (align == 'center'){
-    assert_that(is.numeric(image_height))
-    assert_that(is.numeric(image_width))
-  } else if (align == 'full') {
-    warning('Image Height and Image Width will be overwritten')
+  if (!align %in% c("center", "full")) {
+    cli::cli_abort("{.arg align} must be {.val center} or {.val full}.")
   }
 
-
-  if (align == 'center'){
-    # To convert pt to EMU, use the following calculation: 12700 * 1pt
-    image_height_adj <- 12700 * image_height
-    image_width_adj <- 12700 * image_width
-
-    # Calculate out translation adj
-    translate_x_adj <- as.integer(slide_page_width/2 -image_width_adj/2)
-    translate_y_adj <- as.integer(slide_page_height/2 - image_height_adj/2)
-  } else if (align == 'full') {
-    image_height = slide_page_height/12700
-    image_width = slide_page_width/12700
-    translate_x_adj = 0
-    translate_y_adj = 0
+  if (align == "center") {
+    check_positive_number(image_height)
+    check_positive_number(image_width)
+    image_height_emu <- 12700 * image_height
+    image_width_emu  <- 12700 * image_width
+    translate_x <- as.integer(slide_page_width  / 2 - image_width_emu  / 2)
+    translate_y <- as.integer(slide_page_height / 2 - image_height_emu / 2)
+  } else {
+    image_height <- slide_page_height / 12700
+    image_width  <- slide_page_width  / 12700
+    translate_x  <- 0
+    translate_y  <- 0
   }
 
-  adj_page_element_property <- page_element_property(slide_page_id,
-                                                     height_magnitude = image_height,
-                                                     width_magnitude = image_width,
-                                                     scale_x = 1, scale_y = 1,
-                                                     translate_x = translate_x_adj,
-                                                     translate_y = translate_y_adj,
-                                                     transform_unit = 'EMU')
-  return(adj_page_element_property)
+  page_element_property(
+    slide_page_id,
+    height_magnitude = image_height,
+    width_magnitude  = image_width,
+    scale_x = 1, scale_y = 1,
+    translate_x = translate_x,
+    translate_y = translate_y,
+    transform_unit = "EMU"
+  )
 }

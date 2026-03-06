@@ -4,24 +4,21 @@
 \alias{authorize}
 \title{Authorize R package to access Google Slides API}
 \usage{
-authorize(
-  client_id = getOption("slides.client.id"),
-  client_secret = getOption("slides.client.secret"),
-  token = NULL,
-  ...
-)
+authorize(...)
 }
 \arguments{
-\item{client_id}{OAuth client ID. This is obtained from Google API Credentials}
-
-\item{client_secret}{OAuth client secret. This is obtained from Google API Credentials}
-
-\item{token}{an output from \code{\link{oauth2.0_token}} to set as the
-authentication token.}
-
-\item{...}{additional arguments to send to \code{\link{oauth2.0_token}}}
+\item{...}{Arguments passed on to \code{\link[=gs_auth]{gs_auth()}}.}
+}
+\value{
+Called for its side effect of storing a token. Returns the token
+invisibly.
 }
 \description{
-This is a function to authorize the R package to access the Googleslides API. If no
-client.id and client.secret is provided, the package would provide predefined values.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+
+\code{authorize()} was deprecated in rgoogleslides 1.0.0 in favour of
+\code{\link[=gs_auth]{gs_auth()}}, which uses the gargle package for authentication and
+supports service accounts, token caching, and token sharing with
+other Google API packages.
 }
+\keyword{internal}

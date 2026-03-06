@@ -1,6 +1,26 @@
-^cran-comments\.md$
-^\.travis\.yml$
-^appveyor\.yml$
+# R project files
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^\.httr-oauth$
+
+# Git / CI
+^\.git$
+^\.gitignore$
+^\.github$
+
+# Package development docs
+^README\.Rmd$
+^cran-comments\.md$
+
+# pkgdown
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+
+# macOS
+^\.DS_Store$
+
+# AI coding tools (local only)
+^\.agents$
+^\.cursor$
+^skills$
+^skills-lock\.json$

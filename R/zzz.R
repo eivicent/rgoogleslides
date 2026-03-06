@@ -1,19 +1,34 @@
-.onAttach <- function(libname, pkgname) {
-  packageStartupMessage("Please use predefined Credentials only for the testing requests. To obtain your own Credentials see help(authorize).")
-}
-
 .onLoad <- function(libname, pkgname) {
-  op <- options()
-  op.slides <- list(
-    slides.client.id = "10709400262-28lpv43nui21l1172cup6kh68blvkllq.apps.googleusercontent.com",
-    slides.client.secret = "FADkDoE_H0B7j-VytEjTbgaU",
-    slides.endpoint.create = "https://slides.googleapis.com/v1/presentations",
-    slides.endpoint.get = "https://slides.googleapis.com/v1/presentations/{presentationId}",
-    slides.endpoint.batchUpdate = "https://slides.googleapis.com/v1/presentations/{presentationId}:batchUpdate",
-    slides.endpoint.page.get = "https://slides.googleapis.com/v1/presentations/{presentationId}/pages/{pageObjectId}"
+  utils::assignInMyNamespace(
+    ".auth",
+    gargle::init_AuthState(package = "rgoogleslides", auth_active = TRUE)
   )
-  toset <- !(names(op.slides) %in% names(op))
-  if (any(toset)) options(op.slides[toset])
+
+  if (gargle::secret_has_key("RGOOGLESLIDES_KEY")) {
+    tryCatch(
+      {
+        client <- gargle::gargle_oauth_client_from_json(
+          gargle::secret_decrypt_json(
+            system.file("secret", "rgoogleslides-oauth-client.json",
+              package = "rgoogleslides"
+            ),
+            "RGOOGLESLIDES_KEY"
+          )
+        )
+        .auth$set_client(client)
+      },
+      error = function(e) {
+        rlang::warn(
+          c(
+            "Failed to load the built-in OAuth client for rgoogleslides.",
+            "i" = "The RGOOGLESLIDES_KEY environment variable may be incorrect or the credential file may be corrupted.",
+            "i" = "Use gs_auth_configure() to supply your own OAuth client."
+          ),
+          parent = e
+        )
+      }
+    )
+  }
 
   invisible()
 }

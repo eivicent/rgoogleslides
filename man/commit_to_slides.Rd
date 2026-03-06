@@ -7,10 +7,20 @@
 commit_to_slides(id, google_slide_request)
 }
 \arguments{
-\item{id}{The slide id of the googleslides to be updated}
+\item{id}{The presentation ID.}
 
-\item{google_slide_request}{The google slide request to be applied to the slides}
+\item{google_slide_request}{A \code{GoogleSlidesRequest} object created by the
+\verb{add_*_request()} functions.}
+}
+\value{
+A list containing the API response with any reply data.
 }
 \description{
-Commit changes to slides
+Send a batch of accumulated requests to the Google Slides API.
+}
+\examples{
+\dontshow{if (gs_has_token()) withAutoprint(\{ # examplesIf}
+request <- add_create_slide_page_request()
+commit_to_slides("<presentation-id>", request)
+\dontshow{\}) # examplesIf}
 }
