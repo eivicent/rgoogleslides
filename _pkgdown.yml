@@ -1,4 +1,4 @@
-url: https://github.com/eivicent/rgoogleslides
+url: https://eivicent.github.io/rgoogleslides
 
 template:
   bootstrap: 5
@@ -9,6 +9,10 @@ articles:
     contents:
       - rgoogleslides
       - images
+  - title: Legal
+    navbar: ~
+    contents:
+      - privacy-policy
 
 reference:
   - title: Authentication

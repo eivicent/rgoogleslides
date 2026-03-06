@@ -7,11 +7,14 @@ Authors@R: c(
     person("Vicent", "Boned", role = c("cre", "ctb", "cph"),
            email = "vicent.boned@gmail.com")
     )
-Description: Provides an 'R' interface to the 'Google Slides' API
-    <https://developers.google.com/slides/api>. Create presentations,
-    add slides, insert text, tables, images, and videos programmatically
-    from 'R'. Designed for reproducible reporting workflows where analysis
-    results need to be pushed directly into 'Google Slides' presentations.
+Description: An 'R' interface to the 'Google Slides' API
+    <https://developers.google.com/slides/api>. Create and modify
+    presentations programmatically: add slides, insert text, tables,
+    images, shapes, and videos, and read slide content back into 'R'.
+    Authentication is handled by the 'gargle' package, enabling token
+    sharing with 'googledrive' and 'googlesheets4'. Designed for
+    reproducible reporting workflows where analysis results need to be
+    embedded directly into 'Google Slides' presentations.
 License: MIT + file LICENSE
 URL: https://github.com/eivicent/rgoogleslides
 BugReports: https://github.com/eivicent/rgoogleslides/issues
