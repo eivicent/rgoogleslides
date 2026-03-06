@@ -14,8 +14,3 @@ test_that("gs_oauth_client returns NULL when no client configured", {
   )
   expect_null(gs_oauth_client())
 })
-
-test_that("authorize is deprecated", {
-  local_mocked_bindings(gs_auth = function(...) invisible(NULL))
-  lifecycle::expect_deprecated(authorize())
-})

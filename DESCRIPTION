@@ -25,7 +25,6 @@ Imports:
     gargle (>= 1.5.0),
     httr,
     jsonlite,
-    lifecycle,
     R6,
     rlang
 Suggests:

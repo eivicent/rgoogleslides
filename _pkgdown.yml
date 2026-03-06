@@ -24,7 +24,6 @@ reference:
       - gs_has_token
       - gs_auth_configure
       - gs_oauth_client
-      - authorize
 
   - title: Presentations
     desc: Create and query presentations.
