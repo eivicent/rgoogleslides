@@ -1,0 +1,181 @@
+# rgoogleslides
+
+rgoogleslides is an R interface to the [Google Slides
+API](https://developers.google.com/slides/api). It lets you create and
+modify Google Slides presentations programmatically from R – ideal for
+reproducible reporting workflows where analysis results need to land
+directly in slides.
+
+## Installation
+
+Install the development version from GitHub:
+
+``` r
+# install.packages("pak")
+pak::pak("eivicent/rgoogleslides")
+```
+
+## Authentication
+
+rgoogleslides uses [gargle](https://gargle.r-lib.org/) for
+authentication, which means it shares the same credential infrastructure
+as googledrive and googlesheets4.
+
+``` r
+library(rgoogleslides)
+
+# Interactive OAuth -- opens browser on first use, caches the token
+gs_auth()
+
+# Or use a service account
+gs_auth(path = "/path/to/service-account.json")
+```
+
+## Quick start
+
+``` r
+library(rgoogleslides)
+
+# Create a new presentation
+presentation_id <- create_slides("Quarterly Report")
+
+# Add a blank slide
+requests <- add_create_slide_page_request(predefined_layout = "TITLE_AND_BODY")
+commit_to_slides(presentation_id, requests)
+
+# Insert text into a shape
+requests <- add_insert_text_request(object_id = "<shape-id>", text = "Hello from R!")
+commit_to_slides(presentation_id, requests)
+
+# Insert a data table from a data frame
+props <- get_slides_properties(presentation_id)
+page_id <- props$slides$objectId[2]
+prop <- page_element_property(page_id, width_magnitude = 600, height_magnitude = 300)
+create_data_table(presentation_id, prop, head(iris))
+```
+
+## Features
+
+- **Create presentations** and add slides with any layout
+- **Insert text**, images, tables, shapes, and YouTube videos
+- **Replace text and images** across all slides with a single call
+- **Read slide content** – extract tables, text boxes, and speaker notes
+- **Batch operations** – accumulate multiple requests and commit them at
+  once
+- **gargle-powered auth** – OAuth, service accounts, and token sharing
+
+## Contributing
+
+Issues and pull requests are welcome at
+<https://github.com/eivicent/rgoogleslides>.
+
+# Package index
+
+## Authentication
+
+Manage Google Slides API credentials.
+
+- [`gs_auth()`](https://eivicent.github.io/rgoogleslides/reference/gs_auth.md)
+  : Authorize rgoogleslides
+- [`gs_deauth()`](https://eivicent.github.io/rgoogleslides/reference/gs_deauth.md)
+  : Clear Google Slides credentials
+- [`gs_token()`](https://eivicent.github.io/rgoogleslides/reference/gs_token.md)
+  : Produce a configured token
+- [`gs_has_token()`](https://eivicent.github.io/rgoogleslides/reference/gs_has_token.md)
+  : Is there a token on hand?
+- [`gs_auth_configure()`](https://eivicent.github.io/rgoogleslides/reference/gs_auth_configure.md)
+  : Edit auth configuration
+- [`gs_oauth_client()`](https://eivicent.github.io/rgoogleslides/reference/gs_oauth_client.md)
+  : Retrieve the configured OAuth client
+- [`authorize()`](https://eivicent.github.io/rgoogleslides/reference/authorize.md)
+  **\[deprecated\]** : Authorize R package to access Google Slides API
+
+## Presentations
+
+Create and query presentations.
+
+- [`create_slides()`](https://eivicent.github.io/rgoogleslides/reference/create_slides.md)
+  : Create a new Google Slides presentation
+- [`get_slides_properties()`](https://eivicent.github.io/rgoogleslides/reference/get_slides_properties.md)
+  : Get Google Slides properties
+- [`get_slide_page_properties()`](https://eivicent.github.io/rgoogleslides/reference/get_slide_page_properties.md)
+  : Get a single page of a Google Slides presentation
+- [`commit_to_slides()`](https://eivicent.github.io/rgoogleslides/reference/commit_to_slides.md)
+  : Commit changes to slides
+
+## Request builders
+
+Build individual API requests to commit as a batch.
+
+- [`add_create_image_request()`](https://eivicent.github.io/rgoogleslides/reference/add_create_image_request.md)
+  : Add a create image request
+- [`add_create_shape_request()`](https://eivicent.github.io/rgoogleslides/reference/add_create_shape_request.md)
+  : Add a create shape request
+- [`add_create_slide_page_request()`](https://eivicent.github.io/rgoogleslides/reference/add_create_slide_page_request.md)
+  : Add a create slide request
+- [`add_create_table_request()`](https://eivicent.github.io/rgoogleslides/reference/add_create_table_request.md)
+  : Add a create table request
+- [`add_create_video_request()`](https://eivicent.github.io/rgoogleslides/reference/add_create_video_request.md)
+  : Add a create video request
+- [`add_delete_object_request()`](https://eivicent.github.io/rgoogleslides/reference/add_delete_object_request.md)
+  : Add a delete object request
+- [`add_delete_table_column_request()`](https://eivicent.github.io/rgoogleslides/reference/add_delete_table_column_request.md)
+  : Add a delete table column request
+- [`add_delete_table_row_request()`](https://eivicent.github.io/rgoogleslides/reference/add_delete_table_row_request.md)
+  : Add a delete table row request
+- [`add_delete_text_request()`](https://eivicent.github.io/rgoogleslides/reference/add_delete_text_request.md)
+  : Add a delete text request
+- [`add_insert_table_columns_request()`](https://eivicent.github.io/rgoogleslides/reference/add_insert_table_columns_request.md)
+  : Add an insert table columns request
+- [`add_insert_table_rows_request()`](https://eivicent.github.io/rgoogleslides/reference/add_insert_table_rows_request.md)
+  : Add an insert table rows request
+- [`add_insert_text_request()`](https://eivicent.github.io/rgoogleslides/reference/add_insert_text_request.md)
+  : Add an insert text request
+- [`add_replace_all_shapes_with_image_request()`](https://eivicent.github.io/rgoogleslides/reference/add_replace_all_shapes_with_image_request.md)
+  : Add a replace all shapes with image request
+- [`add_replace_all_text_request()`](https://eivicent.github.io/rgoogleslides/reference/add_replace_all_text_request.md)
+  : Add a replace all text request
+- [`add_update_slides_position_request()`](https://eivicent.github.io/rgoogleslides/reference/add_update_slides_position_request.md)
+  : Add an update slides position request
+
+## Page element properties
+
+Position and size elements on slides.
+
+- [`page_element_property()`](https://eivicent.github.io/rgoogleslides/reference/page_element_property.md)
+  : Common Property: Page Element Property
+- [`aligned_page_element_property()`](https://eivicent.github.io/rgoogleslides/reference/aligned_page_element_property.md)
+  : Convenience function to build a centred or full-page element
+  property
+
+## Helpers
+
+Discover valid API values and inspect objects.
+
+- [`gs_shape_types()`](https://eivicent.github.io/rgoogleslides/reference/gs_shape_types.md)
+  : List valid Google Slides shape types
+- [`is.google_slide_request()`](https://eivicent.github.io/rgoogleslides/reference/is.google_slide_request.md)
+  : Check if the object is a GoogleSlidesRequest
+- [`is.page_element_property()`](https://eivicent.github.io/rgoogleslides/reference/is.page_element_property.md)
+  : Check if the object is a PageElementProperty
+
+## Convenience
+
+Higher-level helpers.
+
+- [`create_data_table()`](https://eivicent.github.io/rgoogleslides/reference/create_data_table.md)
+  : Create and upload data into a table in slides
+
+# Articles
+
+### Articles
+
+- [Getting started with
+  rgoogleslides](https://eivicent.github.io/rgoogleslides/articles/rgoogleslides.md):
+- [Inserting images into
+  slides](https://eivicent.github.io/rgoogleslides/articles/images.md):
+
+### Legal
+
+- [Privacy
+  Policy](https://eivicent.github.io/rgoogleslides/articles/privacy-policy.md):
