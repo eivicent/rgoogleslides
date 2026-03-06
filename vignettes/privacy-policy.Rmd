@@ -1,0 +1,66 @@
+---
+title: "Privacy Policy"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Privacy Policy}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+*Last updated: March 2026*
+
+## Overview
+
+`rgoogleslides` is an open-source R package that provides a programmatic
+interface to the [Google Slides API](https://developers.google.com/slides/api).
+This privacy policy explains what data the package accesses, how it is used, and
+how it is protected.
+
+## What data is accessed
+
+When you authenticate with `gs_auth()`, the package requests the following
+OAuth 2.0 scopes on your behalf:
+
+| Scope | Purpose |
+|-------|---------|
+| `https://www.googleapis.com/auth/presentations` | Read and write Google Slides presentations that you own or have been shared with you |
+| `https://www.googleapis.com/auth/drive.readonly` | Read file metadata and download files from Google Drive (used to resolve Drive-hosted image URLs when inserting images into slides) |
+
+## How data is used
+
+All API calls are made **on your behalf** using your own Google account
+credentials. The package:
+
+- Creates, reads, and modifies Google Slides presentations at your explicit
+  direction (i.e. when you call package functions)
+- Reads Google Drive file metadata only to resolve image URLs when you
+  explicitly insert a Drive-hosted image into a slide
+
+The package does **not**:
+
+- Collect, store, or transmit any user data to third parties
+- Access any files or presentations beyond what your R code explicitly requests
+- Run any background or scheduled operations
+
+## Where credentials are stored
+
+OAuth tokens are cached locally on your machine in the gargle token cache
+(typically `~/.cache/gargle/` on Linux/macOS or `%APPDATA%\gargle\` on
+Windows). Tokens are stored only on your own device and are never sent anywhere
+other than Google's OAuth servers.
+
+You can remove cached tokens at any time by calling `gs_deauth()`, or by
+deleting the gargle cache directory manually.
+
+## OAuth client
+
+The package ships with a bundled OAuth 2.0 client registered under the
+`rgoogleslides` Google Cloud project. This client credential identifies the
+application to Google's consent screen but does not grant access to any user
+data on its own. You can supply your own OAuth client with
+`gs_auth_configure()` if you prefer.
+
+## Contact
+
+For questions about this privacy policy or the package's data practices, please
+open an issue at <https://github.com/eivicent/rgoogleslides/issues>.
